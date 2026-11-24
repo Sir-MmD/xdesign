@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- xDesign's logo (the owner's choice E, 2026-11-24): the letters xD, the D a speech bubble with a
+       bot's typing dots, on dark navy. tools/icons.sh makes every icon file from this one. -->
+  <defs>
+    <linearGradient id="xd-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1C2642"/>
+      <stop offset="1" stop-color="#0F1424"/>
+    </linearGradient>
+    <linearGradient id="xd-ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5CD6FF"/>
+      <stop offset="1" stop-color="#3B6FF6"/>
+    </linearGradient>
+  </defs>
+  <path d="M128 24H384A104 104 0 0 1 488 128V384A104 104 0 0 1 384 488H128A104 104 0 0 1 24 384V128A104 104 0 0 1 128 24Z" fill="url(#xd-bg)"/>
+  <path d="M106 212L190 300M190 212L106 300" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round"/>
+  <path d="M236 150H312A106 106 0 0 1 312 362H286L232 404L236 362Z" fill="url(#xd-ink)"/>
+  <circle cx="282" cy="256" r="15" fill="#0F1424"/>
+  <circle cx="324" cy="256" r="15" fill="#0F1424"/>
+  <circle cx="366" cy="256" r="15" fill="#0F1424"/>
+</svg>

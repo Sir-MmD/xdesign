@@ -1,0 +1,400 @@
+/* Telegram Web K's own rules (docs/plan/29-owner-list-2026-10-22.md sections 8.5 and 8.6,
+   TGP-04): what this look draws differently from the shared rules of preview.css, which
+   imports this file into the preview's shadow root. Every rule is scoped by the look and
+   repeats the shared selector after it, so it wins over the shared rule:
+
+     [data-skin='webk'] .tg-share { ... }
+     [data-skin='webk'][data-theme='dark'] .tg-bubble { ... }
+     .tg-chat[data-skin='webk'] { ... }    (the chat itself; the rich card is .tg-card)
+
+   Telegram's art for this look is var(--tg-art-<role>) (art/icons.ts); on the parts that
+   wallpaper/webk.ts names in fillParts, var(--tg-wp-fill) is the wallpaper's fill.
+   Values that are tokens belong in webk.ts; this file holds the shapes and parts the tokens
+   cannot draw. Every value is from the measurement sheet .dev/upd29/tg/web-k.md, which names
+   its source file and line in tweb. */
+
+/* The chat column and its gutters (web-k.md section 1; updateColumnWidths.ts:87-97, 311-314):
+   the column is at most 696 wide and centred, 16 from the window's sides and top, 8 in a window
+   of 600 px or less (the tokens hold the 728 px frame's 16). (w - 600) x 1000 is a step: 0 or
+   less up to 600 px, 1000 px or more above. */
+.tg-chat[data-skin='webk'] {
+  --webk-gutter: clamp(8px, (var(--tg-frame-width) - 600px) * 1000, 16px);
+  --webk-side: max(var(--webk-gutter), (var(--tg-frame-width) - 696px) / 2);
+}
+
+[data-skin='webk'] .tg-row {
+  padding-right: var(--webk-side);
+  padding-left: var(--webk-side);
+}
+
+/* The top bar: a plate as wide as the column, a gutter under the frame's top (web-k.md section
+   4.8); the messages start under it as --tg-list-top counts it at 16. */
+[data-skin='webk'] .tg-header {
+  top: var(--webk-gutter);
+  right: var(--webk-side);
+  left: var(--webk-side);
+}
+
+[data-skin='webk'] .tg-list {
+  padding-top: calc(var(--tg-list-top) - 16px + var(--webk-gutter));
+}
+
+/* The tail is drawn over the bubble's shadow, as the app's tail is (z-index -2 inside the
+   bubble's own layer, _chatBubble.scss:2125-2137, 450-463; RVW-29c). */
+[data-skin='webk'] .tg-tail {
+  z-index: 1;
+}
+
+/* Emoji in the text are 18 px images whatever the text's size, also in quotes, code and
+   buttons (.emoji-image, base.scss:1053-1064). */
+[data-skin='webk'] .tg-text img.tg-emoji,
+[data-skin='webk'] .tg-rich img.tg-emoji,
+[data-skin='webk'] .tg-kb-text img.tg-emoji {
+  width: 18px;
+  height: 18px;
+}
+
+/* A single photo or video has a 1 px border in the bubble's colour all round, also over a
+   caption (_chatBubble.scss:2140-2145); an album has none, its items' outer corners the
+   bubble's radius less 1 (prepareAlbum.ts:25-67). */
+[data-skin='webk'] .tg-media {
+  margin-bottom: var(--tg-media-inset);
+}
+
+[data-skin='webk'] .tg-album,
+[data-skin='webk'] .tg-album.alone {
+  margin: 0;
+}
+
+/* Media without a caption keeps the tail, and a single picture its round corner beside it
+   (has-plain-media-tail, _chatBubble.scss:3483-3487), also above buttons, where an album's
+   corner there stays square; over the comments bar their bottom corners are square
+   (_chatBubble.scss:1689-1692). */
+[data-skin='webk'] .tg-bubble.has-tail .tg-media.alone {
+  border-bottom-left-radius: calc(var(--tg-radius) - var(--tg-media-inset));
+}
+
+[data-skin='webk'] .tg-bubble.has-tail .tg-album.alone {
+  border-bottom-left-radius: 0;
+}
+
+[data-skin='webk'] .tg-bubble-wrap.with-comments .tg-media.alone,
+[data-skin='webk'] .tg-bubble-wrap.with-comments .tg-album.alone {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* The info row: nothing before the count (messageRender.ts:285-297). Under big emoji its pill
+   sits in the corner of the 20 px under the emoji (_chatBubble.scss:825-845, 1875-1881). */
+[data-skin='webk'] .tg-meta-count.first {
+  margin-left: 0;
+}
+
+[data-skin='webk'] .tg-meta.overlay.big {
+  right: 0;
+  bottom: 0;
+}
+
+/* Big emoji: 4 above, 20 under, at most 420 wide; drawn as images they are at most 64 px, in
+   the middle of their line, except one emoji, the app's sticker (_chatBubble.scss:800-850). */
+[data-skin='webk'] .tg-big-emoji {
+  max-width: 420px;
+  padding: 4px 0 20px;
+}
+
+[data-skin='webk'] .tg-big-emoji-text img.tg-emoji:not(:only-of-type) {
+  width: min(1em, 64px);
+  height: min(1em, 64px);
+  vertical-align: middle;
+}
+
+/* Inline code takes the size of the text around it (base.scss:583-588). */
+[data-skin='webk'] .tg-code {
+  font-size: inherit;
+}
+
+/* A code block (base.scss:2110-2178): black at 0.8 in dark; its header the language (or
+   "copy") filling the line, then the wrap button (`menu`, 14 after the name) and the copy
+   button, 20 px boxes with 16 px glyphs in the header's colour; the code always left to
+   right. */
+[data-skin='webk'][data-theme='dark'] .tg-pre {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+[data-skin='webk'] .tg-pre-header {
+  gap: 0;
+  line-height: 1;
+}
+
+[data-skin='webk'] .tg-pre-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-skin='webk'] .tg-pre-header::after {
+  flex: 0 0 auto;
+  order: 1;
+  width: 20px;
+  height: 20px;
+  margin-inline-start: 14px;
+  background-color: currentColor;
+  content: '';
+  -webkit-mask: var(--tg-art-code-menu) center / 16px 16px no-repeat;
+  mask: var(--tg-art-code-menu) center / 16px 16px no-repeat;
+  mask-mode: var(--tg-art-mask-mode, alpha);
+}
+
+[data-skin='webk'] .tg-pre-copy {
+  order: 2;
+  width: 20px;
+  height: 20px;
+  margin-inline-start: 0;
+  color: var(--tg-pre-label);
+  -webkit-mask-size: 16px 16px;
+  mask-size: 16px 16px;
+}
+
+[data-skin='webk'] .tg-pre-body {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
+/* In a right-to-left message the block takes the message's direction (the pre has no dir of
+   its own, wrapRichText.ts:337-347): its bar on the right and its header's 10 px start there
+   too (padding-inline-end: .0625rem, base.scss:2118-2128; RVW-29c). */
+[data-skin='webk'] .tg-text[dir='rtl'] .tg-pre {
+  box-shadow: inset calc(var(--tg-code-bar) * -1) 0 0 var(--tg-pre-bar);
+}
+
+[data-skin='webk'] .tg-text[dir='rtl'] .tg-pre-header {
+  padding: 1px 10px 1px 1px;
+}
+
+/* A quote is as wide as its text (_quote.scss:3-10); the expandable one's arrow is a 15.4 px
+   glyph in its 16 px box (_quote.scss:73-115). */
+[data-skin='webk'] .tg-quote {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* A quote sits at the start of its own text (margin-inline-end: auto with dir="auto" on the
+   quote, _quote.scss:159-163, setInnerHTML.ts:15-19): a right-to-left quote on the right, also
+   in a left-to-right message, and a left-to-right one on the left (RVW-29c). */
+[data-skin='webk'] .tg-text .tg-quote[data-dir='rtl'] {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+[data-skin='webk'] .tg-text .tg-quote[data-dir='ltr'] {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+[data-skin='webk'] .tg-quote-expand {
+  -webkit-mask-size: 15.4px 15.4px;
+  mask-size: 15.4px 15.4px;
+}
+
+/* The link preview: 4 under it too, its site name and title in 500, its picture at most 380
+   high, 3 above and under it (_chatBubble.scss:2690-2831). */
+[data-skin='webk'] .tg-webpage {
+  margin-bottom: 4px;
+}
+
+[data-skin='webk'] .tg-webpage-site,
+[data-skin='webk'] .tg-webpage-title {
+  font-weight: 500;
+}
+
+[data-skin='webk'] .tg-webpage-photo {
+  max-height: 380px;
+  margin: 3px 0;
+  object-fit: cover;
+}
+
+/* In a right-to-left message the preview takes the message's direction (it is put in the
+   message before its time, bubbles.ts:10049-10056): its bar and its 9 px start on the right, its
+   small picture at the line's end on the left (_chatBubble.scss:2899-2904, 2743-2757; RVW-29c). */
+[data-skin='webk'] .tg-text[dir='rtl'] .tg-webpage {
+  padding: 4px 9px 4px 6px;
+  box-shadow: inset calc(var(--tg-webpage-bar) * -1) 0 0 var(--tg-webpage-accent);
+}
+
+[data-skin='webk'] .tg-text[dir='rtl'] .tg-webpage.with-thumb .tg-webpage-text {
+  margin-right: 0;
+  margin-left: calc(var(--tg-webpage-thumb) + 8px);
+}
+
+[data-skin='webk'] .tg-text[dir='rtl'] .tg-webpage-thumb {
+  float: left;
+}
+
+/* Reactions: the count's line 18, the emoji in its 22 px box; under media without a caption
+   they start 3 under the bubble (_reaction.scss:210-224, _reactions.scss:4-10). */
+[data-skin='webk'] .tg-reaction {
+  line-height: 18px;
+}
+
+[data-skin='webk'] .tg-reaction img.tg-emoji {
+  margin: 0 1px;
+}
+
+[data-skin='webk'] .tg-reactions.outside {
+  padding-top: 3px;
+}
+
+/* The comments bar (_chatBubble.scss:2192-2239): the icon 2 from the start, the arrow 3 from
+   the bubble's end, out of the row. */
+[data-skin='webk'] .tg-comments {
+  position: relative;
+}
+
+[data-skin='webk'] .tg-comments-icon {
+  margin-inline-start: 2px;
+}
+
+[data-skin='webk'] .tg-comments-arrow {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  bottom: 0;
+  margin: auto 0;
+}
+
+/* Buttons under the post: a coloured one is its colour at 0.8 over the wallpaper, in place of
+   the highlight (_chatBubble.scss:2658-2663); a link button's arrow is turned to the top right
+   (_chatBubble.scss:3840-3842). */
+[data-skin='webk'] .tg-kb-button.success {
+  background: var(--tg-kb-success);
+}
+
+[data-skin='webk'] .tg-kb-button.primary {
+  background: var(--tg-kb-primary);
+}
+
+[data-skin='webk'] .tg-kb-button.danger {
+  background: var(--tg-kb-danger);
+}
+
+[data-skin='webk'] .tg-kb-button[data-kind='url'] .tg-kb-mark {
+  transform: rotate(-45deg);
+}
+
+/* A label 9 px from the button's top and bottom, the button at least 40 high, so a label of two
+   lines makes it 2 lines + 18 (.reply-markup-button, _chatBubble.scss:3784-3793; RVW-29c). */
+[data-skin='webk'] .tg-kb-button {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+/* A rich message (web-k.md section 6; instantView.module.scss): its blocks 8 from the bubble's
+   sides, from its top edge; a paragraph 6 above and under it, and two in a row as the lines of
+   one text (:247-262); headings in 500, 12 above and 8 under, H1 19 / 25, H2 18 / 24, H3 17 / 22
+   (:204-245); a quote 3 / 18 / 3 / 9 inside and 8 around (:475-491); code and formulas 10.67
+   around (:269-291); a divider a third of the width, centred, 8 around (:326-335); a list 6 and
+   a table 8 inside (:337-347, :740-743). Details, pictures and maps keep the shared 8 between
+   blocks (not in the sheet). */
+[data-skin='webk'] .tg-rich {
+  padding: 0 var(--tg-pad-right) var(--tg-pad-bottom) var(--tg-pad-left);
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-leaf:not(.tg-rich-heading, .tg-rich-math, :has(> .tg-pre, > .tg-quote)) {
+  margin-top: 0;
+  padding: 6px 0;
+}
+
+[data-skin='webk']
+  .tg-rich-blocks
+  > .tg-rich-leaf:not(.tg-rich-heading, .tg-rich-math, :has(> .tg-pre, > .tg-quote))
+  + .tg-rich-leaf:not(.tg-rich-heading, .tg-rich-math, :has(> .tg-pre, > .tg-quote)) {
+  margin-top: -6px;
+  padding-top: 0;
+}
+
+[data-skin='webk'] .tg-rich-heading {
+  padding: 12px 0 8px;
+  font-weight: 500;
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-heading {
+  margin-top: 0;
+}
+
+[data-skin='webk'] .tg-rich-heading.h1 {
+  font-size: 19px;
+  line-height: 25px;
+}
+
+[data-skin='webk'] .tg-rich-heading.h2 {
+  font-size: 18px;
+  line-height: 24px;
+}
+
+[data-skin='webk'] .tg-rich-heading.h3 {
+  font-size: 17px;
+  line-height: 22px;
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-leaf:has(> .tg-quote) {
+  margin: 8px 0;
+}
+
+[data-skin='webk'] .tg-rich .tg-rich-leaf .tg-quote {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-leaf:has(> .tg-pre),
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-math {
+  margin: 10.67px 0;
+}
+
+[data-skin='webk'] .tg-rich-divider {
+  width: calc(100% / 3);
+  margin: 8px auto;
+  background: #dfe1e5;
+}
+
+[data-skin='webk'][data-theme='dark'] .tg-rich-divider {
+  background: #0f0f0f;
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-table-wrap {
+  margin-top: 0;
+  padding: 8px 0;
+}
+
+[data-skin='webk'] .tg-rich-blocks > .tg-rich-list {
+  margin-top: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* The private chat (PRV-02; calibrate: O-02): the input's plate, its round button and the Start
+   plate in the column's gutters with the bubble's shadow; in the commands menu a description
+   stands over its command. */
+[data-skin='webk'] .tg-composer-area.floating > .tg-composer-row,
+[data-skin='webk'] .tg-composer-area.floating > .tg-start {
+  padding-right: var(--webk-side);
+  padding-left: var(--webk-side);
+}
+
+[data-skin='webk'] .tg-composer,
+[data-skin='webk'] .tg-send-button,
+[data-skin='webk'] .tg-start-button {
+  box-shadow: 0 1px 2px var(--tg-shadow);
+}
+
+[data-skin='webk'] .tg-command-text {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+[data-skin='webk'] .tg-command-main {
+  font-weight: 500;
+}

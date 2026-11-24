@@ -1,0 +1,11 @@
+{
+  // The package's scripts (make catalog-check), run by Node: Node's types, and the package's
+  // source through its project reference.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "outDir": "../node_modules/.cache/tsc-scripts"
+  },
+  "include": ["."],
+  "references": [{ "path": ".." }]
+}

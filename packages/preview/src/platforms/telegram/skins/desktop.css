@@ -1,0 +1,249 @@
+/* Telegram Desktop's own rules (docs/plan/29-owner-list-2026-10-22.md section 8.4, TGP-05):
+   what this look draws differently from the shared rules of preview.css, which imports this
+   file into the preview's shadow root, from its measurement sheet .dev/upd29/tg/desktop.md.
+   Every rule is scoped by the look and repeats the shared selector after it, so it wins over
+   the shared rule:
+
+     [data-skin='desktop'] .tg-share { ... }
+     [data-skin='desktop'][data-theme='dark'] .tg-bubble { ... }
+     .tg-chat[data-skin='desktop'] { ... }    (the chat itself; the rich card is .tg-card)
+
+   Telegram's art for this look is var(--tg-art-<role>) (art/icons.ts): white on black, drawn
+   by preview.css's .tg-icon as luminance masks. Values that are tokens are in desktop.ts. */
+
+/* The bubble's hard shadow is one 2 px band under its bottom that starts under the tail, so the
+   tail's 6 px of it is a plain band, not the tail's shape moved down (message_bubble.cpp:
+   186-205; 29 section 8.4, RVW-29c). */
+[data-skin='desktop'] .tg-bubble-wrap:has(> .tg-tail)::after {
+  position: absolute;
+  bottom: calc(var(--tg-tail-bottom) - var(--tg-shadow-y));
+  left: var(--tg-tail-left);
+  width: var(--tg-tail-width);
+  height: var(--tg-shadow-y);
+  background: var(--tg-tail-shadow);
+  content: '';
+}
+
+/* The top bar of a two-column window has no picture; the name's and the status's 18 px lines
+   are 2 px apart, at 8 and 28 (history_view_top_bar_widget.cpp:545-556, 666-734). */
+.tg-chat[data-skin='desktop'] .tg-header-avatar {
+  display: none;
+}
+
+[data-skin='desktop'] .tg-header-sub {
+  margin-top: 2px;
+}
+
+/* The text starts right under the channel's name (history_view_message.cpp:2732); a link
+   preview above the text (invert media) 5 px under the name, and the text 5 px under it. */
+[data-skin='desktop'] .tg-title + .tg-body > .tg-text,
+[data-skin='desktop'] .tg-title + .tg-body > .tg-rich {
+  padding-top: 0;
+}
+
+[data-skin='desktop'] .tg-title + .tg-webpage-wrap.above {
+  padding-top: 5px;
+}
+
+[data-skin='desktop'] .tg-webpage-wrap.above .tg-webpage {
+  margin-top: 0;
+}
+
+[data-skin='desktop'] .tg-webpage-wrap.above + .tg-body > .tg-text {
+  padding-top: 5px;
+}
+
+/* Emoji: 18 px with 1 px on each side (the shared rule adds the one after) on top of the line;
+   a premium emoji 20 px, 1 px over the 18 px line above and below, so the line keeps its height
+   (text_custom_emoji.cpp:45-47); none around the emoji of a reaction. */
+[data-skin='desktop'] img.tg-emoji {
+  margin-inline-start: 1px;
+}
+
+[data-skin='desktop'] .tg-premium-emoji {
+  margin-block: -1px;
+  margin-inline-end: 0;
+}
+
+[data-skin='desktop'] .tg-reaction img.tg-emoji {
+  margin: 0;
+}
+
+/* One to three emoji alone: 36 px each in a 38 px box, the boxes 2 px apart
+   (history_view_large_emoji.cpp:72-86); their info row on the service pill, its corners 6
+   (an estimate: the sheet's open point 6). */
+[data-skin='desktop'] .tg-big-emoji-text img.tg-emoji {
+  margin: 1px;
+}
+
+[data-skin='desktop'] .tg-big-emoji-text img.tg-emoji + img.tg-emoji {
+  margin-inline-start: 3px;
+}
+
+[data-skin='desktop'] .tg-meta.overlay.big {
+  border-radius: 6px;
+}
+
+/* The info row (history_view_bottom_info.cpp:296-354): its texts on one 18 px line, the eye
+   16 x 11 3 px under its top; over media a 22 px pill, 2 px above and below the line. The
+   signature, the ", " and the time take at most 144 px, the signature cut first
+   (maxSignatureSize, chat.style:174): ", " and a 12-hour time are about 4.25em of it (an
+   estimate: the preview measures no text). */
+[data-skin='desktop'] .tg-meta {
+  align-items: flex-start;
+  line-height: 18px;
+}
+
+[data-skin='desktop'] .tg-meta.overlay {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+[data-skin='desktop'] .tg-eye {
+  height: 11px;
+  margin-top: 3px;
+}
+
+[data-skin='desktop'] .tg-meta-signature.joined {
+  max-width: calc(144px - 4.25em);
+}
+
+/* A quote's and a link preview's bar is the channel's color at 229/255, their fill starts
+   after it, and the quote's mark keeps the full color (text.cpp:225-336); an open quote's
+   arrow is flipped, not turned (intro_country_dropdown-flip_vertical). */
+[data-skin='desktop'] .tg-quote {
+  background: linear-gradient(var(--tg-quote-bg), var(--tg-quote-bg)) right / calc(100% - var(--tg-quote-bar)) 100%
+    no-repeat;
+  box-shadow: inset var(--tg-quote-bar) 0 0 color-mix(in srgb, var(--tg-quote-bar-color) 89.8%, transparent);
+}
+
+[data-skin='desktop'] .tg-quote-expand.open {
+  transform: scaleY(-1);
+}
+
+[data-skin='desktop'] .tg-webpage {
+  background: linear-gradient(var(--tg-webpage-bg), var(--tg-webpage-bg)) right / calc(100% - var(--tg-webpage-bar))
+    100% no-repeat;
+  box-shadow: inset var(--tg-webpage-bar) 0 0 color-mix(in srgb, var(--tg-webpage-accent) 89.8%, transparent);
+}
+
+/* The info row in the link preview's last line, inside its 7 px padding (SkinTokens.webpage.metaInside,
+   history_view_web_page.cpp:801-866; TGP-02). */
+[data-skin='desktop'] .tg-body:has(> .tg-text > .tg-webpage:last-child):not(:has(> .tg-reactions)) > .tg-meta {
+  right: calc(var(--tg-meta-right) + 7px);
+  bottom: calc(var(--tg-meta-bottom) + 7px);
+}
+
+/* A code block (text.cpp:225-336): the 20 px header band and the body's fill start after the
+   bar and do not overlap; the language (or "copy") at 10 / 2, the copy mark at 2 / 4 from the
+   end. Monospace text is never bold or italic (text_block.cpp:23-24). */
+[data-skin='desktop'] .tg-pre {
+  background: linear-gradient(var(--tg-pre-bg), var(--tg-pre-bg)) right bottom / calc(100% - var(--tg-code-bar))
+    calc(100% - var(--tg-code-header-height)) no-repeat;
+}
+
+[data-skin='desktop'] .tg-pre-header {
+  margin-left: var(--tg-code-bar);
+  padding-left: calc(10px - var(--tg-code-bar));
+}
+
+[data-skin='desktop'] .tg-pre-copy {
+  align-self: flex-start;
+}
+
+[data-skin='desktop'] .tg-code,
+[data-skin='desktop'] .tg-pre {
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* A code block's lines never wrap: the bubble widens to the widest (with the paddings), up to
+   the column (code.wideBubble gives --tg-bubble-max), and a wider one scrolls sideways; the
+   rest of the text still wraps at 430 or at the code's width, the bubble's width being
+   max(code, min(430, text)), and a long channel's name never widens it past 430
+   (Message::monospaceMaxWidth and resizeContentGetHeight, history_view_message.cpp:5573-5592,
+   6676-6703). */
+[data-skin='desktop'] .tg-pre-body {
+  overflow-x: auto;
+  overflow-wrap: normal;
+  white-space: pre;
+  scrollbar-width: none;
+}
+
+[data-skin='desktop'] .tg-text .tg-pre {
+  max-width: calc(var(--tg-bubble-max) - var(--tg-pad-left) - var(--tg-pad-right));
+}
+
+[data-skin='desktop'] .tg-row:has(.tg-text .tg-pre) > .tg-bubble-wrap,
+[data-skin='desktop'] .tg-row:has(.tg-text .tg-pre) > .tg-message {
+  width: max-content;
+  min-width: min-content;
+  max-width: min(430px, var(--tg-bubble-max));
+}
+
+[data-skin='desktop'] .tg-row:has(.tg-text .tg-pre) .tg-title {
+  max-width: min(430px, var(--tg-bubble-max));
+}
+
+/* Media above the comments bar is not the bubble's last part: square at the bottom
+   (history_view_media.cpp:628-657). */
+[data-skin='desktop'] .tg-bubble-wrap.with-comments .tg-bubble .tg-media.alone,
+[data-skin='desktop'] .tg-bubble-wrap.with-comments .tg-bubble .tg-album.alone {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Reactions in the bubble (history_view_message.cpp:2018-2043, 7264-7292;
+   history_view_reactions.cpp:234-246, 375-419): 5 px under the text, their rows from 3 px
+   before the text's start to 3 px before its end; the info row leaves the text's last line for
+   the end of their last row, or a 13 px line under them when it does not fit there
+   (SkinTokens.reactions.meta, TGP-02). Under media without a caption they sit 5 px under the
+   bubble. */
+[data-skin='desktop'] .tg-body > .tg-text:has(+ .tg-reactions),
+[data-skin='desktop'] .tg-body > .tg-rich:has(+ .tg-reactions) {
+  padding-bottom: 0;
+}
+
+[data-skin='desktop'] .tg-body > .tg-reactions {
+  padding: 0 calc(var(--tg-pad-right) + 3px) var(--tg-pad-bottom) calc(var(--tg-pad-left) - 3px);
+}
+
+[data-skin='desktop'] .tg-reactions.outside {
+  padding-top: 5px;
+}
+
+/* The comments bar's line lies above its 40 px, in the date's color at 0.3
+   (history_view_message.cpp:2209-2213). */
+[data-skin='desktop'] .tg-comments {
+  border-top: 0;
+  box-shadow: 0 -1px var(--tg-comments-border);
+}
+
+/* Buttons under the post (history_view_element.cpp:180-330): the text 8 px from the top, and a
+   colored button in its own semi-transparent color, not laid over the service fill. */
+[data-skin='desktop'] .tg-kb-button {
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+[data-skin='desktop'] .tg-kb-button.success {
+  background: var(--tg-kb-success);
+}
+
+[data-skin='desktop'] .tg-kb-button.primary {
+  background: var(--tg-kb-primary);
+}
+
+[data-skin='desktop'] .tg-kb-button.danger {
+  background: var(--tg-kb-danger);
+}
+
+/* The private chat (PRV-02; calibrate: O-02): in the commands menu a command and its description
+   follow each other on one line, the command in semibold. */
+[data-skin='desktop'] .tg-command-text {
+  justify-content: flex-start;
+}
+
+[data-skin='desktop'] .tg-command-main {
+  font-weight: 600;
+}

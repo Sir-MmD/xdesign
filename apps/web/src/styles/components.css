@@ -1,0 +1,319 @@
+/*
+ * The design system's motion, copied from xWriter's panel (web/src/styles/components.css)
+ * without its route transitions and its Home strip; the section numbers are xWriter's plan.
+ *
+ * Keyframes of the design system's components (17 section 4.6), used by name in Tailwind
+ * classes such as `after:animate-[x-shimmer_1.4s_ease-in-out_infinite]`: the skeleton's
+ * shimmer. The components stop their motion under Reduced and Off (`motion-reduce:`, 4.8,
+ * and the site's motion level, app/motion.ts).
+ */
+@keyframes x-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * The motion of the design system (32 sections 18.2 and 18.3, MOT-01), on the springs of
+ * app.css (docs/plan/35-owner-list-2026-11-04.md section 12.2, APL-01) and only with opacity
+ * and transforms. The popups of Base UI (dialogs, sheets, menus, pickers, popovers, tips and a
+ * tab's content) are transitions between their data-starting-style and data-ending-style, so
+ * one that closes while it opens turns back from where it is; rows, cards and pages are
+ * keyframes that run when they mount, which nothing stops. The site's level (data-motion on
+ * <html>, app/motion.ts) sets how much: Reduced keeps the fades and moves nothing (the end of this
+ * file), Off ends everything at once.
+ */
+@keyframes x-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes x-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--shift));
+  }
+}
+@keyframes x-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise));
+  }
+}
+@keyframes x-fold {
+  to {
+    opacity: 0;
+    transform: scaleY(var(--fold));
+  }
+}
+
+@layer components {
+  /* The scrim under a dialog or a sheet fades in and out with it. */
+  .x-backdrop {
+    transition: opacity var(--dur-grow) var(--ease-enter);
+  }
+  .x-backdrop:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  /* A dialog grows from 98% with a fade, on the smooth spring. */
+  .x-dialog {
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-grow);
+    transition-timing-function: var(--ease-enter);
+  }
+  .x-dialog:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(var(--shrink));
+  }
+
+  /* A sheet slides in from its edge on the soft spring (sheet.tsx sets data-side). */
+  .x-sheet {
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-slide);
+    transition-timing-function: var(--ease-slide);
+  }
+  .x-sheet:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+  .x-sheet[data-side='right']:is([data-starting-style], [data-ending-style]) {
+    transform: translateX(var(--slide));
+  }
+  .x-sheet[data-side='left']:is([data-starting-style], [data-ending-style]) {
+    transform: translateX(calc(-1 * var(--slide)));
+  }
+  .x-sheet[data-side='bottom']:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(var(--slide));
+  }
+  .x-sheet[data-side='top']:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(calc(-1 * var(--slide)));
+  }
+
+  /* Under 760 px a dialog and a right sheet are bottom sheets: they slide up from the edge. */
+  @media (width < 760px) {
+    .x-dialog {
+      transition-duration: var(--dur-slide);
+      transition-timing-function: var(--ease-slide);
+    }
+    .x-dialog:is([data-starting-style], [data-ending-style]),
+    .x-sheet[data-side='right']:is([data-starting-style], [data-ending-style]) {
+      transform: translateY(var(--slide));
+    }
+  }
+
+  /*
+   * What closes goes faster, on the quick spring. While it goes it no longer takes the
+   * pointer, so a click on the page right after a dialog, a sheet or a menu closes reaches
+   * the page instead of the fading scrim (35 section 12.2: no input waits for motion).
+   */
+  :is(.x-backdrop, .x-dialog, .x-sheet)[data-ending-style] {
+    transition-duration: var(--dur-leave);
+    transition-timing-function: var(--ease-leave);
+  }
+  :is(.x-backdrop, .x-dialog, .x-sheet, .x-pop)[data-ending-style] {
+    pointer-events: none;
+  }
+
+  /*
+   * Menus, pickers, popovers and tips fade with a 4 px slide from their trigger on the quick
+   * spring, in and out. A picker that lines its value up with its trigger only fades (Base
+   * UI's side `none`), and Base UI shows some at once (data-instant: a tip right after
+   * another, a menu opened with the keyboard or closed with Escape).
+   */
+  .x-pop {
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-pop);
+    transition-timing-function: var(--ease-pop);
+  }
+  .x-pop:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+  .x-pop[data-ending-style] {
+    transition-timing-function: var(--ease-leave);
+  }
+  .x-pop[data-side='bottom']:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(calc(-1 * var(--shift)));
+  }
+  .x-pop[data-side='top']:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(var(--shift));
+  }
+  .x-pop:is([data-side='left'], [data-side='inline-start']):is([data-starting-style], [data-ending-style]) {
+    transform: translateX(var(--shift));
+  }
+  .x-pop:is([data-side='right'], [data-side='inline-end']):is([data-starting-style], [data-ending-style]) {
+    transform: translateX(calc(-1 * var(--shift)));
+  }
+  .x-pop[data-side='inline-start']:dir(rtl):is([data-starting-style], [data-ending-style]) {
+    transform: translateX(calc(-1 * var(--shift)));
+  }
+  .x-pop[data-side='inline-end']:dir(rtl):is([data-starting-style], [data-ending-style]) {
+    transform: translateX(var(--shift));
+  }
+  .x-pop[data-instant] {
+    transition-duration: 0s;
+  }
+
+  /*
+   * A tab's content (tabs.tsx): the new one fades in on the smooth spring while the old one
+   * leaves the page at once, so the two never stand one under the other and nothing jumps
+   * (important over a panel's own flex or grid class).
+   */
+  .x-swap {
+    transition: opacity var(--dur-swap) var(--ease-enter);
+  }
+  .x-swap[data-starting-style] {
+    opacity: 0;
+  }
+  .x-swap[data-ending-style] {
+    display: none !important;
+  }
+
+  /*
+   * For the pages (MOT-02, 32 section 18.2). `x-row-in` fades a row in when it mounts, on the
+   * smooth spring, and `x-row-out` folds one that goes away to its top on the quick one (keep
+   * it --dur-leave before removing it; lib/listMotion.ts makes it inert meanwhile and slides
+   * the rows under it up once it is gone); a list of more than 100 rows does not animate its
+   * rows. `x-cards` on a grid or a list brings its items in one after another, 30 ms apart, at
+   * most the first ten: the rest come with the tenth. `x-page` fades the content of a page in
+   * as it rises 8 px.
+   */
+  .x-row-in {
+    animation: x-fade-in var(--dur-grow) var(--ease-enter) backwards;
+  }
+  .x-row-out {
+    animation: x-fold var(--dur-leave) var(--ease-leave) forwards;
+    transform-origin: top;
+    pointer-events: none;
+  }
+  .x-cards > * {
+    animation: x-rise-in var(--dur-grow) var(--ease-enter) backwards;
+  }
+  .x-cards > :nth-child(2) {
+    animation-delay: var(--stagger);
+  }
+  .x-cards > :nth-child(3) {
+    animation-delay: calc(2 * var(--stagger));
+  }
+  .x-cards > :nth-child(4) {
+    animation-delay: calc(3 * var(--stagger));
+  }
+  .x-cards > :nth-child(5) {
+    animation-delay: calc(4 * var(--stagger));
+  }
+  .x-cards > :nth-child(6) {
+    animation-delay: calc(5 * var(--stagger));
+  }
+  .x-cards > :nth-child(7) {
+    animation-delay: calc(6 * var(--stagger));
+  }
+  .x-cards > :nth-child(8) {
+    animation-delay: calc(7 * var(--stagger));
+  }
+  .x-cards > :nth-child(9) {
+    animation-delay: calc(8 * var(--stagger));
+  }
+  .x-cards > :nth-child(n + 10) {
+    animation-delay: calc(9 * var(--stagger));
+  }
+  /*
+   * Cards that come later (usePresence marks them x-row-in: a page that More adds, Show all)
+   * come in with the same rhythm counted from the first of them, instead of waiting unseen
+   * for the tenth's delay and rising together (FIX-32n).
+   */
+  .x-cards > .x-row-in {
+    animation-delay: 0s;
+  }
+  .x-cards > :nth-child(2 of .x-row-in) {
+    animation-delay: var(--stagger);
+  }
+  .x-cards > :nth-child(3 of .x-row-in) {
+    animation-delay: calc(2 * var(--stagger));
+  }
+  .x-cards > :nth-child(4 of .x-row-in) {
+    animation-delay: calc(3 * var(--stagger));
+  }
+  .x-cards > :nth-child(5 of .x-row-in) {
+    animation-delay: calc(4 * var(--stagger));
+  }
+  .x-cards > :nth-child(6 of .x-row-in) {
+    animation-delay: calc(5 * var(--stagger));
+  }
+  .x-cards > :nth-child(7 of .x-row-in) {
+    animation-delay: calc(6 * var(--stagger));
+  }
+  .x-cards > :nth-child(8 of .x-row-in) {
+    animation-delay: calc(7 * var(--stagger));
+  }
+  .x-cards > :nth-child(9 of .x-row-in) {
+    animation-delay: calc(8 * var(--stagger));
+  }
+  .x-cards > :nth-child(n + 10 of .x-row-in) {
+    animation-delay: calc(9 * var(--stagger));
+  }
+  /* A card that goes folds away as a row does, at once (MOT-02). */
+  .x-cards > .x-row-out {
+    animation: x-fold var(--dur-leave) var(--ease-leave) forwards;
+  }
+  .x-page {
+    animation: x-page-in var(--dur-rise) var(--ease-rise) backwards;
+  }
+}
+
+/*
+ * Reduced (app.css stops every other animation and transition): what comes and goes in the
+ * design system still fades, on the quick spring (240 ms), and its distances are zero, so
+ * nothing moves.
+ */
+:root[data-motion='reduced'] :is(.x-backdrop, .x-dialog, .x-sheet, .x-pop:not([data-instant]), .x-swap) {
+  transition-duration: var(--dur-pop) !important;
+  transition-timing-function: var(--ease-pop) !important;
+}
+:root[data-motion='reduced'] :is(.x-row-in, .x-row-out, .x-cards > *, .x-page) {
+  animation-duration: var(--dur-pop) !important;
+  animation-timing-function: var(--ease-pop) !important;
+}
+/* A list of more than 100 rows never animates its rows, at any level. */
+:root :has(> .x-row-in:nth-child(101)) > :is(.x-row-in, .x-row-out) {
+  animation-duration: 0s !important;
+}
+/* Under Off a row that goes is gone at once, without the empty place of its fold (MOT-02). */
+:root[data-motion='off'] .x-row-out {
+  display: none;
+}
+
+/*
+ * A hit area of --target (44 px) around a control that is smaller on a phone (35 section
+ * 12.2, APL-01): small buttons, toggles, chips and tabs. A layer below the utilities, so a
+ * control placed with `absolute` or `fixed` keeps its place (any position holds the hit
+ * area), and `after:hidden` takes it away where it would cover a neighbor.
+ */
+@layer components {
+  @media (width < 760px) {
+    .x-target {
+      position: relative;
+    }
+    .x-target::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, var(--target));
+      height: max(100%, var(--target));
+      translate: -50% -50%;
+      content: '';
+    }
+  }
+}
+
+/*
+ * Headings and regions that get the focus by script (tabindex="-1": a wizard step, a
+ * section jump, the main region) are not controls, so they show no focus outline (WCAG
+ * 2.4.7 asks it of controls). In the base layer, so a component's own focus classes win.
+ */
+@layer base {
+  [tabindex='-1']:focus-visible {
+    outline: none;
+  }
+}

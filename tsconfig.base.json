@@ -1,0 +1,29 @@
+{
+  // Shared compiler options of every package and app. Workspace packages are consumed as
+  // TypeScript source (no build step), so tsc -b only checks: it writes declarations and its
+  // build info into each project's node_modules/.cache/tsc, which project references need.
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "${configDir}/node_modules/.cache/tsc",
+    "skipLibCheck": true,
+    "types": []
+  }
+}

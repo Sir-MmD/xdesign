@@ -1,0 +1,10 @@
+{
+  // The configuration files at the root (ESLint, Prettier), checked as JavaScript with types.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "types": ["node"]
+  },
+  "include": ["*.js"]
+}

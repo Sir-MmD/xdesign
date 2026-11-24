@@ -1,0 +1,5 @@
+{
+  // The API contract, shared by the server and the web app: no DOM and no Node types here.
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"]
+}

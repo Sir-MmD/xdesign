@@ -1,0 +1,6 @@
+{
+  // The design model runs in the browser and in Node: no DOM and no Node types here. The fixture
+  // designs (fixtures/) are plain designs too.
+  "extends": "../../tsconfig.base.json",
+  "include": ["src", "fixtures"]
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- xDesign's logo for 32 pixels and less (browser tabs, taskbars): icon.svg drawn bolder and larger,
+       without the typing dots, which would be a smear at those sizes. -->
+  <defs>
+    <linearGradient id="xd-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1C2642"/>
+      <stop offset="1" stop-color="#0F1424"/>
+    </linearGradient>
+    <linearGradient id="xd-ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5CD6FF"/>
+      <stop offset="1" stop-color="#3B6FF6"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="104" fill="url(#xd-bg)"/>
+  <path d="M68 184L196 328M196 184L68 328" stroke="#FFFFFF" stroke-width="60" stroke-linecap="round"/>
+  <path d="M244 104H310A152 152 0 0 1 310 408H296L236 456L244 408Z" fill="url(#xd-ink)"/>
+</svg>

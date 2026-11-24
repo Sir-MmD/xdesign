@@ -1,0 +1,112 @@
+/*
+ * The map's look (docs/plan/04 section 4.3): React Flow's stylesheet with the site's tokens in
+ * Light and Dark, the boxes' dots, and sections that let clicks through to the map except on
+ * their title bar and resize edges.
+ */
+@import '@xyflow/react/dist/style.css';
+
+.xd-map .react-flow {
+  --xy-background-color: var(--background);
+  --xy-edge-stroke: var(--text-3);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-stroke-selected: var(--brand);
+  --xy-connectionline-stroke: var(--brand);
+  --xy-connectionline-stroke-width: 1.5;
+  --xy-background-pattern-color: var(--border-strong);
+  --xy-selection-background-color: color-mix(in srgb, var(--brand) 8%, transparent);
+  --xy-selection-border: 1px solid color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+/* A dot: arrows leave from it or come in on it. */
+.xd-map .react-flow__handle.xd-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--text-3);
+  background: var(--surface);
+}
+
+.xd-map .react-flow__handle.xd-dot.connectable:hover,
+.xd-map .react-flow__handle.xd-dot.connectingfrom,
+.xd-map .react-flow__handle.xd-dot.connectingto {
+  border-color: var(--brand);
+  background: var(--brand);
+}
+
+/* The dot arrows come in on stays small; arrows can be dropped anywhere on the box. */
+.xd-map .react-flow__handle.xd-dot.xd-in {
+  width: 8px;
+  height: 8px;
+}
+
+.xd-map .react-flow__edge-path.xd-jump {
+  stroke-dasharray: 6 4;
+}
+
+/*
+ * Lit lines (MAP-10, lines.ts): the selected steps' lines, a picked line and the hovered dot's line
+ * bold in the brand color (a Go to's stays dashed). While a step is selected every other box, line
+ * and label fades (sections stay), the short tags too (MAP-11, TagEdge.tsx: a lit line is never a
+ * tag); the box the hovered dot's line goes into is outlined.
+ */
+.xd-map .react-flow__edge.xd-lit .react-flow__edge-path {
+  stroke: var(--brand);
+  stroke-width: 2.5;
+}
+
+.xd-map.xd-fade .react-flow__node:not(.xd-lit):not(.xd-frame),
+.xd-map.xd-fade .react-flow__edge:not(.xd-lit),
+.xd-map.xd-fade .xd-arrow-label:not(.xd-lit),
+.xd-map.xd-fade .xd-tags {
+  opacity: 0.3;
+}
+
+.xd-map .react-flow__node.xd-aimed .xd-box {
+  border-color: var(--brand);
+  outline: 2px solid color-mix(in srgb, var(--brand) 30%, transparent);
+}
+
+.xd-map .react-flow__node:focus-visible {
+  outline: none;
+}
+
+.xd-map .react-flow__node:focus-visible > * {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.xd-map .react-flow__node.xd-frame {
+  pointer-events: none;
+}
+
+.xd-map .react-flow__node.xd-frame .xd-frame-head,
+.xd-map .react-flow__node.xd-frame .react-flow__resize-control {
+  pointer-events: all;
+}
+
+.xd-map .react-flow__node.xd-frame.draggable .xd-frame-head {
+  cursor: grab;
+}
+
+/* The minimap at the bottom right, in the site's colors; sections as light frames. */
+.xd-map .react-flow__minimap {
+  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-mask-background-color: color-mix(in srgb, var(--background) 65%, transparent);
+  --xy-minimap-node-background-color: var(--border-strong);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.xd-map .react-flow__minimap-node.xd-minimap-frame {
+  fill: color-mix(in srgb, var(--border-strong) 25%, transparent);
+  stroke: var(--border-strong);
+  stroke-width: 4;
+}
+
+/* Comment mode (CMT-02): a click on a box, a button's pill or the empty map starts a thread. */
+.xd-commenting .react-flow__pane,
+.xd-commenting .react-flow__node,
+.xd-commenting .react-flow__node * {
+  cursor: crosshair;
+}

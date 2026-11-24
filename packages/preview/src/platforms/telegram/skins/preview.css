@@ -1,0 +1,1522 @@
+/* The Telegram preview (docs/plan/10-frontend.md section 8). Loaded into the preview's
+   shadow root as a constructable stylesheet; every look-specific value comes from the
+   custom properties PreviewFrame sets from a tokens file. What a look draws its own way goes
+   in its own stylesheet, imported (and so inlined) here, every rule scoped by the look's
+   [data-skin='<look>'] on the chat or the rich card: a rule there repeats the shared
+   selector after that attribute, so it wins over the shared one whatever their order
+   (docs/plan/29-owner-list-2026-10-22.md section 8.6, TGP-02). */
+
+@import './web.css';
+@import './webk.css';
+@import './desktop.css';
+@import './android.css';
+@import './ios.css';
+@import './chat.css';
+@import './poll.css';
+@import './invoice.css';
+@import './events.css';
+
+:host {
+  all: initial;
+  display: block;
+}
+
+/* The chat, clear: the look's wallpaper is drawn behind it (wallpaper/Wallpaper.tsx, 29
+   section 8.4); positioned, so it paints over the wallpaper's layers. */
+.tg-chat {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--tg-frame-width);
+  overflow: hidden;
+  color: var(--tg-text);
+  font-family: var(--tg-font);
+  font-size: var(--tg-font-size);
+  line-height: var(--tg-line-height);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.tg-chat *,
+.tg-chat *::before,
+.tg-chat *::after {
+  box-sizing: border-box;
+}
+
+/* Chat header: a bar at the top, or one that floats over the chat (the chat then runs under
+   it, with an optional fade), in parts a look's stylesheet draws its own way: the back and
+   menu buttons, and .tg-header-main with the avatar and the text, which groups them only
+   where a look draws them as one piece (29 section 8.6). */
+.tg-header {
+  position: var(--tg-header-position);
+  top: var(--tg-header-top);
+  right: var(--tg-header-side);
+  left: var(--tg-header-side);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: var(--tg-header-justify);
+  gap: var(--tg-header-gap);
+  height: var(--tg-header-height);
+  padding: 0 var(--tg-header-pad-x);
+  border-radius: var(--tg-header-radius);
+  background: var(--tg-header);
+  box-shadow: var(--tg-header-shadow);
+  color: var(--tg-header-text);
+  line-height: 1.2;
+}
+
+/* The line under the bar (Desktop). */
+.tg-header::after {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--tg-header-border);
+  content: '';
+}
+
+.tg-header-main {
+  display: contents;
+}
+
+.tg-header-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--tg-header-button);
+  height: var(--tg-header-button);
+  border-radius: 50%;
+  background: var(--tg-header-button-bg);
+  color: var(--tg-header-icon);
+}
+
+.tg-header-button.menu {
+  margin-inline-start: auto;
+}
+
+.tg-header-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.tg-header-fade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  height: var(--tg-header-fade);
+  background: linear-gradient(to bottom, var(--tg-header-fade-color), transparent);
+  pointer-events: none;
+}
+
+.tg-header-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  order: var(--tg-header-avatar-order);
+  place-items: center;
+  width: var(--tg-header-avatar);
+  height: var(--tg-header-avatar);
+  overflow: hidden;
+  border-radius: 50%;
+  color: #ffffff;
+  font-family: var(--tg-header-initial-font);
+  font-size: var(--tg-header-initial-size);
+  font-weight: var(--tg-header-initial-weight);
+}
+
+.tg-header-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tg-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: var(--tg-header-text-align);
+  min-width: 0;
+}
+
+.tg-header-title {
+  overflow: hidden;
+  font-size: var(--tg-header-title-size);
+  font-weight: var(--tg-header-title-weight);
+  line-height: var(--tg-header-title-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-header-sub {
+  color: var(--tg-header-subtext);
+  font-size: var(--tg-header-sub-size);
+  line-height: var(--tg-header-sub-line-height);
+}
+
+/* Messages. Under a floating bar the list starts below it (--tg-list-top counts the bar). */
+.tg-list {
+  padding: var(--tg-list-top) 0 var(--tg-list-bottom);
+}
+
+.tg-row {
+  display: flex;
+  align-items: flex-end;
+  padding-right: var(--tg-bubble-margin-right);
+  padding-left: var(--tg-bubble-margin-left);
+}
+
+.tg-bubble-wrap {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: var(--tg-bubble-min);
+  max-width: var(--tg-bubble-max);
+}
+
+.tg-bubble {
+  position: relative;
+  min-height: var(--tg-bubble-min-height);
+  overflow: hidden;
+  border-radius: var(--tg-radius);
+  background: var(--tg-bubble);
+  box-shadow:
+    0 var(--tg-shadow-y) var(--tg-shadow-blur) var(--tg-shadow-spread) var(--tg-shadow),
+    0 0 0 var(--tg-outline-width) var(--tg-outline);
+}
+
+/* The corner at the tail: square, or round where the tail is drawn over it (iOS). */
+.tg-bubble.has-tail {
+  border-bottom-left-radius: var(--tg-tail-corner);
+}
+
+.tg-tail {
+  position: absolute;
+  bottom: var(--tg-tail-bottom);
+  left: var(--tg-tail-left);
+  width: var(--tg-tail-width);
+  height: var(--tg-tail-height);
+  fill: var(--tg-bubble);
+  filter: drop-shadow(0 var(--tg-tail-shadow-y) var(--tg-tail-shadow-blur) var(--tg-tail-shadow));
+}
+
+.tg-title {
+  padding: var(--tg-pad-top) var(--tg-pad-right) var(--tg-title-gap) var(--tg-pad-left);
+  overflow: hidden;
+  color: var(--tg-title-color);
+  font-size: var(--tg-title-size);
+  font-weight: var(--tg-title-weight);
+  line-height: var(--tg-title-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-title.before-media {
+  padding-bottom: var(--tg-title-media-gap);
+}
+
+/* Media. */
+.tg-media,
+.tg-album {
+  position: relative;
+  margin: var(--tg-media-inset) var(--tg-media-inset) 0;
+  overflow: hidden;
+  border-radius: calc(var(--tg-radius) - var(--tg-media-inset)) calc(var(--tg-radius) - var(--tg-media-inset))
+    var(--tg-media-caption-radius) var(--tg-media-caption-radius);
+}
+
+.tg-title + .tg-media,
+.tg-title + .tg-album {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.tg-media.alone,
+.tg-album.alone {
+  margin-bottom: var(--tg-media-inset);
+  border-bottom-right-radius: calc(var(--tg-radius) - var(--tg-media-inset));
+  border-bottom-left-radius: calc(var(--tg-radius) - var(--tg-media-inset));
+}
+
+/* An album's inset in the bubble, which the bubble's width counts (SkinTokens.album.inset, 29
+   section 8.6, TGP-02); its corners keep the media's. */
+.tg-album {
+  margin: var(--tg-album-inset) var(--tg-album-inset) 0;
+}
+
+.tg-album.alone {
+  margin-bottom: var(--tg-album-inset);
+}
+
+.has-tail .tg-media.alone,
+.has-tail .tg-album.alone {
+  border-bottom-left-radius: max(0px, var(--tg-tail-corner) - var(--tg-media-inset));
+}
+
+.tg-media-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(14px);
+  transform: scale(1.15);
+}
+
+/* A layer over the blurred copy (Desktop and Web K darken it). */
+.tg-media-shade {
+  position: absolute;
+  inset: 0;
+  background: var(--tg-media-shade);
+}
+
+.tg-media-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  object-fit: cover;
+  transform: translate(-50%, -50%);
+}
+
+.tg-album-item {
+  position: absolute;
+  overflow: hidden;
+}
+
+.tg-album-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tg-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tg-play-size);
+  height: var(--tg-play-size);
+  border-radius: 50%;
+  background: var(--tg-play-bg);
+  color: var(--tg-play-color);
+  transform: translate(-50%, -50%);
+}
+
+/* xWriter's triangle, --tg-play-icon tall, a little right of the center; or the look's art. */
+.tg-play::after {
+  position: absolute;
+  top: calc((var(--tg-play-size) - var(--tg-play-icon)) / 2);
+  left: calc((var(--tg-play-size) - var(--tg-play-icon) * 7 / 9) / 2 + var(--tg-play-icon) / 9);
+  border-top: calc(var(--tg-play-icon) / 2) solid transparent;
+  border-bottom: calc(var(--tg-play-icon) / 2) solid transparent;
+  border-left: calc(var(--tg-play-icon) * 7 / 9) solid currentColor;
+  content: '';
+}
+
+.tg-play.art::after {
+  content: none;
+}
+
+.tg-play-icon {
+  position: absolute;
+  inset: 0;
+  width: var(--tg-play-icon);
+  height: var(--tg-play-icon);
+  margin: auto;
+}
+
+/* A video's duration at its top-left corner (29 section 8.4). */
+.tg-duration {
+  position: absolute;
+  top: var(--tg-duration-top);
+  left: var(--tg-duration-left);
+  height: var(--tg-duration-height);
+  padding: 0 var(--tg-duration-pad);
+  border-radius: var(--tg-duration-radius);
+  background: var(--tg-duration-bg);
+  color: var(--tg-duration-text);
+  font-size: var(--tg-duration-size);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--tg-duration-height);
+}
+
+/* An icon of the look's art (SkinTokens.icons): the picture (--tg-icon, set on the element)
+   as a mask over the current color, in the look's mask mode (art/icons.ts: luminance for
+   Desktop's white-on-black PNGs, alpha for the others). */
+.tg-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  background-color: currentColor;
+  -webkit-mask-image: var(--tg-icon);
+  mask-image: var(--tg-icon);
+  mask-mode: var(--tg-art-mask-mode, alpha);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* The text block with its reactions; the info row sits at its bottom-right corner. */
+.tg-body {
+  position: relative;
+}
+
+/* Text, laid out like Web A's .text-content: every line keeps its own direction. */
+.tg-text {
+  display: flow-root;
+  padding: var(--tg-pad-top) var(--tg-pad-right) var(--tg-pad-bottom) var(--tg-pad-left);
+  overflow-wrap: anywhere;
+  text-align: start;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+/* Text that reactions or the comments bar follow (iOS keeps less room under it). */
+.tg-text.before-footer {
+  padding-bottom: var(--tg-pad-footer);
+}
+
+.tg-media + .tg-body .tg-text,
+.tg-album + .tg-body .tg-text {
+  padding-top: var(--tg-caption-top);
+  padding-bottom: var(--tg-caption-bottom);
+}
+
+/* A caption that reactions or the comments bar follow keeps the look's room there
+   (SkinTokens.caption.footer, RVW-29c); :where lets a look's own rules for them win. */
+:where(.tg-media, .tg-album) + .tg-body .tg-text.before-footer {
+  padding-bottom: var(--tg-caption-footer);
+}
+
+.tg-bold {
+  font-weight: var(--tg-bold);
+}
+
+.tg-link {
+  color: var(--tg-link);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* URL and text links underlined where the look does (Web K); mentions and hashtags never. */
+.tg-link[data-link='url'],
+.tg-link[data-link='email'],
+.tg-link[data-link='text'] {
+  text-decoration: var(--tg-link-decoration);
+}
+
+.tg-link:hover {
+  text-decoration: underline;
+}
+
+/* Links in a quote, in the quote's color where the look tints them (Desktop, Android). */
+.tg-quote .tg-link {
+  color: var(--tg-quote-link);
+}
+
+/* An invisible direction mark (the preview option "Invisible marks"): the character stays in
+   the text, an inline span without a box of its own, so the order of the line does not change,
+   and a thin tick marks where it is. The tick is a little wider than it looks, so the title
+   (RLM, LRM, ALM) is easy to reach. */
+.tg-mark {
+  position: relative;
+  --tg-mark-color: var(--tg-mark-rlm);
+}
+
+.tg-mark.lrm {
+  --tg-mark-color: var(--tg-mark-lrm);
+}
+
+.tg-mark.alm {
+  --tg-mark-color: var(--tg-mark-alm);
+}
+
+.tg-mark::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 6px;
+  background: linear-gradient(
+    to right,
+    transparent 2px,
+    var(--tg-mark-color) 2px,
+    var(--tg-mark-color) 4px,
+    transparent 4px
+  );
+  content: '';
+}
+
+.tg-code {
+  padding: var(--tg-code-inline-pad);
+  border-radius: var(--tg-code-radius);
+  background: var(--tg-code-bg);
+  color: var(--tg-code-text);
+  font-family: var(--tg-code-font);
+  font-size: var(--tg-code-size);
+}
+
+/* A code block: its bar at the start, a header with the language (or the look's label) and
+   the look's copy mark, then the code. */
+.tg-pre {
+  display: block;
+  margin: var(--tg-code-block-margin) 0;
+  overflow: hidden;
+  border-radius: var(--tg-code-radius);
+  background: var(--tg-pre-bg);
+  box-shadow: inset var(--tg-code-bar) 0 0 var(--tg-pre-bar);
+  color: var(--tg-pre-text);
+  font-family: var(--tg-code-font);
+  font-size: var(--tg-code-block-size);
+  line-height: var(--tg-code-line-height);
+}
+
+.tg-pre-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--tg-code-header-height);
+  padding: var(--tg-code-header-pad);
+  background: var(--tg-pre-header-bg);
+  color: var(--tg-pre-label);
+  font-family: var(--tg-code-header-font);
+  font-size: var(--tg-code-header-size);
+  font-weight: var(--tg-code-header-weight);
+}
+
+.tg-pre-label {
+  min-width: 0;
+}
+
+.tg-pre-copy {
+  width: 16px;
+  height: 16px;
+  margin-inline-start: auto;
+  color: var(--tg-pre-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
+}
+
+.tg-pre-body {
+  display: block;
+  padding: var(--tg-code-block-pad);
+  font-family: inherit;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+/* The bar under a long code block that copies it (SkinTokens.code.copyBar: Android's "COPY
+   CODE"): the look's copy icon and the label, centred, in the language's color. */
+.tg-pre-copy-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tg-code-copy-bar-gap);
+  height: var(--tg-code-copy-bar-height);
+  overflow: hidden;
+  color: var(--tg-pre-label);
+  font-family: var(--tg-font);
+  font-size: var(--tg-code-copy-bar-size);
+  font-weight: var(--tg-code-copy-bar-weight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tg-pre-copy-bar-icon {
+  width: var(--tg-code-copy-bar-icon);
+  height: var(--tg-code-copy-bar-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
+}
+
+/* A code block or quote that opens the text, where the look spaces it apart (SkinTokens.code.first
+   and quote.first: Android); a code block that opens the bubble too rounds its top-right corner
+   more (29 section 8.4, TGP-02). */
+.tg-text > .tg-pre.first {
+  margin-top: var(--tg-code-first-margin);
+}
+
+.tg-bubble > .tg-body:first-child > .tg-text > .tg-pre.first {
+  border-top-right-radius: var(--tg-code-first-radius);
+}
+
+.tg-text > .tg-quote.first {
+  margin-top: var(--tg-quote-first-margin);
+  padding-top: var(--tg-quote-first-pad);
+}
+
+.tg-quote {
+  position: relative;
+  display: block;
+  margin: var(--tg-quote-pad-block) 0;
+  padding: var(--tg-quote-pad-y) var(--tg-quote-pad-end) var(--tg-quote-pad-y) var(--tg-quote-pad-start);
+  border-radius: var(--tg-quote-radius);
+  background: var(--tg-quote-bg);
+  box-shadow: inset var(--tg-quote-bar) 0 0 var(--tg-quote-bar-color);
+  font-size: var(--tg-quote-font-size);
+  line-height: var(--tg-quote-line-height);
+  unicode-bidi: plaintext;
+}
+
+.tg-quote-body {
+  display: block;
+}
+
+/* A quote wider than the look's share of the text's column takes the whole column
+   (SkinTokens.quote.wideAt: Android's 70 %, measured by parts.tsx). */
+.tg-text .tg-quote[data-wide] {
+  width: auto;
+}
+
+/* A folded quote fades out over its last lines (--tg-quote-fade: where the fade starts). */
+.tg-quote.folded .tg-quote-body {
+  max-height: calc(var(--tg-quote-lines) * 1lh);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000000 var(--tg-quote-fade), transparent);
+}
+
+.tg-quote.expandable,
+.tg-quote.folded {
+  cursor: pointer;
+}
+
+.tg-quote-icon {
+  position: absolute;
+  top: var(--tg-quote-icon-top);
+  right: var(--tg-quote-icon-end);
+  width: var(--tg-quote-icon-width);
+  height: var(--tg-quote-icon-height);
+  color: var(--tg-quote-bar-color);
+  fill: currentColor;
+}
+
+/* The arrow of an expandable quote: xWriter's chevron, or the look's art (turned when open). */
+.tg-quote-chevron {
+  position: absolute;
+  right: var(--tg-quote-expand-end);
+  bottom: var(--tg-quote-expand-bottom);
+  width: var(--tg-quote-expand-width);
+  height: var(--tg-quote-expand-height);
+  border-right: 2px solid var(--tg-quote-bar-color);
+  border-bottom: 2px solid var(--tg-quote-bar-color);
+  transform: rotate(45deg);
+}
+
+.tg-quote-chevron.up {
+  bottom: calc(var(--tg-quote-expand-bottom) - 3px);
+  transform: rotate(225deg);
+}
+
+.tg-quote-expand {
+  position: absolute;
+  right: var(--tg-quote-expand-end);
+  bottom: var(--tg-quote-expand-bottom);
+  width: var(--tg-quote-expand-width);
+  height: var(--tg-quote-expand-height);
+  color: var(--tg-quote-bar-color);
+}
+
+.tg-quote-expand.open {
+  transform: rotate(180deg);
+}
+
+.tg-spoiler:not(.shown) {
+  border-radius: var(--tg-spoiler-radius);
+  background-image: radial-gradient(
+    circle,
+    var(--tg-spoiler-dots) var(--tg-spoiler-dot),
+    transparent var(--tg-spoiler-dot-edge)
+  );
+  background-size: var(--tg-spoiler-cell) var(--tg-spoiler-cell);
+  color: transparent;
+  cursor: pointer;
+  animation: tg-dots 1.75s ease-in-out infinite alternate;
+}
+
+.tg-spoiler:not(.shown) * {
+  color: transparent;
+}
+
+/* Pictures of emoji do not take the transparent color: hidden until the spoiler opens. */
+.tg-spoiler:not(.shown) img.tg-emoji,
+.tg-spoiler:not(.shown) .tg-premium-emoji {
+  visibility: hidden;
+}
+
+@keyframes tg-dots {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-spoiler:not(.shown) {
+    animation: none;
+  }
+}
+
+.tg-custom-emoji {
+  text-decoration: underline dashed;
+  text-underline-offset: 3px;
+}
+
+/* Premium emoji (PremiumEmoji sets their 1.25em box, which their font size scales to the
+   look's size): apart like the emoji images. */
+.tg-premium-emoji {
+  margin-inline-end: var(--tg-emoji-gap);
+  font-size: var(--tg-custom-emoji-font);
+}
+
+/* Emoji images (Web A: 1.25em, 1px apart, aligned with the text's bottom). */
+img.tg-emoji {
+  display: inline-block;
+  width: var(--tg-emoji-size);
+  height: var(--tg-emoji-size);
+  margin-inline-end: var(--tg-emoji-gap);
+  vertical-align: var(--tg-emoji-align);
+}
+
+.tg-emoji.text {
+  font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
+/* The info row at the bubble's bottom-right corner (Web A MessageMeta.scss); the text
+   keeps room for it with an invisible copy at the end of its last line. */
+.tg-meta {
+  position: absolute;
+  right: var(--tg-meta-right);
+  bottom: var(--tg-meta-bottom);
+  display: flex;
+  align-items: center;
+  height: var(--tg-meta-height);
+  padding: 0 var(--tg-meta-pad);
+  color: var(--tg-meta);
+  direction: ltr;
+  font-size: var(--tg-meta-size);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The room of the info row: a float at the right end of the last line (Web A floats the
+   info row itself, _message-content.scss), so a right-to-left last line, which ends on the
+   left, makes room on its right too. When the line is full it moves under the text and
+   adds one line; own-line always does (the apps after right-to-left text). */
+.tg-meta-spacer {
+  float: right;
+  height: var(--tg-meta-drop);
+  margin-inline-start: var(--tg-meta-reserve);
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.tg-meta-spacer.own-line {
+  display: block;
+  float: none;
+}
+
+/* Web A in a message that starts right to left (.text-content:dir(rtl)): the info row
+   floats left, and quotes have their bar on the right and their mark on the left
+   (logical sides in _message-content.scss). A look that sets each quote's side itself marks it
+   with data-dir (SkinTokens.quote.direction: Web K's own direction, the apps' left to right). */
+.tg-meta-spacer.left {
+  float: left;
+}
+
+.tg-meta.left {
+  right: auto;
+  left: var(--tg-meta-right);
+}
+
+.tg-text.rtl .tg-quote:not([data-dir]),
+.tg-quote[data-dir='rtl'] {
+  padding: var(--tg-quote-pad-y) var(--tg-quote-pad-start) var(--tg-quote-pad-y) var(--tg-quote-pad-end);
+  box-shadow: inset calc(var(--tg-quote-bar) * -1) 0 0 var(--tg-quote-bar-color);
+}
+
+.tg-text.rtl .tg-quote:not([data-dir]) .tg-quote-icon,
+.tg-quote[data-dir='rtl'] .tg-quote-icon {
+  right: auto;
+  left: var(--tg-quote-icon-end);
+}
+
+.tg-text.rtl .tg-quote:not([data-dir]) .tg-quote-chevron,
+.tg-text.rtl .tg-quote:not([data-dir]) .tg-quote-expand,
+.tg-quote[data-dir='rtl'] .tg-quote-chevron,
+.tg-quote[data-dir='rtl'] .tg-quote-expand {
+  right: auto;
+  left: var(--tg-quote-expand-end);
+}
+
+.tg-meta-spacer .tg-meta {
+  position: static;
+}
+
+.tg-meta-signature {
+  overflow: hidden;
+  max-width: 16ch;
+  margin-right: 6px;
+  text-overflow: ellipsis;
+}
+
+/* The signature joined to the time ("Jane, 3:05 PM": Web K, Desktop, Android). */
+.tg-meta-signature.joined {
+  margin-right: 0;
+}
+
+.tg-meta-time {
+  margin-right: var(--tg-meta-time-gap);
+}
+
+/* The view counter, in its own color where the look has one (Android). */
+.tg-meta-count,
+.tg-eye {
+  color: var(--tg-views);
+}
+
+.tg-eye {
+  flex: 0 0 auto;
+  width: var(--tg-meta-icon);
+  height: var(--tg-meta-icon);
+  fill: currentColor;
+}
+
+.tg-meta-count.first {
+  margin-left: 2px;
+}
+
+.tg-eye.after-count {
+  margin: 0 var(--tg-meta-icon-gap) 0 var(--tg-meta-count-gap);
+}
+
+.tg-eye.before-count {
+  margin-right: var(--tg-meta-count-gap);
+}
+
+.tg-meta-count.last {
+  margin-right: var(--tg-meta-icon-gap);
+}
+
+.tg-meta.overlay {
+  right: var(--tg-meta-overlay-right);
+  bottom: var(--tg-meta-overlay-bottom);
+  height: var(--tg-meta-overlay-height);
+  padding: 0 var(--tg-meta-overlay-pad-end) 0 var(--tg-meta-overlay-pad-start);
+  border-radius: var(--tg-meta-overlay-radius);
+  background: var(--tg-media-meta-bg);
+  color: var(--tg-media-meta-text);
+}
+
+.tg-meta.overlay .tg-meta-count {
+  color: inherit;
+}
+
+.tg-meta.overlay .tg-eye {
+  color: var(--tg-media-meta-icon);
+}
+
+/* The info row's pill under big emoji. */
+.tg-meta.overlay.big {
+  background: var(--tg-big-emoji-meta-bg);
+}
+
+/* Under a single emoji, the app's sticker pill (SkinTokens.bigEmoji.single, TGP-02). */
+.tg-big-emoji.single > .tg-meta.overlay.big {
+  padding: 0 var(--tg-big-single-pad);
+  border-radius: var(--tg-big-single-radius);
+}
+
+/* Link preview card. */
+.tg-webpage {
+  display: flow-root;
+  margin-top: var(--tg-webpage-top);
+  padding: var(--tg-webpage-pad);
+  border-radius: var(--tg-webpage-radius);
+  background: var(--tg-webpage-bg);
+  box-shadow: inset var(--tg-webpage-bar) 0 0 var(--tg-webpage-accent);
+  font-size: var(--tg-webpage-size);
+  line-height: var(--tg-webpage-line-height);
+  white-space: normal;
+}
+
+.tg-webpage-wrap.above {
+  padding: var(--tg-pad-top) var(--tg-pad-right) 0 var(--tg-pad-left);
+}
+
+.tg-webpage-text {
+  display: block;
+}
+
+.tg-webpage.with-thumb .tg-webpage-text {
+  min-height: var(--tg-webpage-thumb);
+  margin-right: calc(var(--tg-webpage-thumb) + 8px);
+}
+
+.tg-webpage-site {
+  display: block;
+  color: var(--tg-webpage-accent);
+  font-weight: 600;
+}
+
+.tg-webpage-title {
+  display: block;
+  font-weight: 600;
+}
+
+.tg-webpage-desc {
+  display: block;
+}
+
+.tg-webpage-photo {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+
+.tg-webpage-thumb {
+  float: right;
+  width: var(--tg-webpage-thumb);
+  height: var(--tg-webpage-thumb);
+  margin-top: calc(var(--tg-webpage-thumb) * -1);
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* Reactions and the comments bar (options, off by default). Under media without a caption,
+   and under big emoji, the reactions sit under the bubble over the wallpaper (.outside). */
+.tg-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tg-reactions-row-gap) var(--tg-reactions-gap);
+  margin-top: var(--tg-reactions-top);
+  padding: 0 var(--tg-pad-right) var(--tg-pad-bottom) var(--tg-pad-left);
+}
+
+.tg-reactions.outside {
+  margin-top: 0;
+  padding: 4px 0 0;
+}
+
+/* The info row's room at the end of the reactions' last row (SkinTokens.reactions.meta, 29
+   section 8.6, TGP-02): when the row is full it moves to a line of its own under them. */
+.tg-reactions > .tg-meta-spacer {
+  flex: none;
+  height: var(--tg-reactions-meta-drop);
+  margin-inline: calc(var(--tg-reactions-meta-gap) - var(--tg-reactions-gap)) calc(var(--tg-reactions-meta-end) * -1);
+}
+
+.tg-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tg-reaction-emoji-gap);
+  height: var(--tg-reaction-height);
+  padding: 2px var(--tg-reaction-pad-end) 2px var(--tg-reaction-pad-start);
+  border-radius: var(--tg-reaction-radius);
+  background: var(--tg-reaction-bg);
+  color: var(--tg-reaction-text);
+  font-size: var(--tg-reaction-size);
+  font-weight: var(--tg-reaction-weight);
+}
+
+.tg-reaction img.tg-emoji {
+  width: var(--tg-reaction-emoji);
+  height: var(--tg-reaction-emoji);
+}
+
+.tg-reactions.outside .tg-reaction {
+  background: var(--tg-reaction-outside-bg);
+  color: var(--tg-reaction-outside-text);
+}
+
+/* The comments bar: the look's icon, the label, and the arrow at the end (29 section 8.6). */
+.tg-comments {
+  display: flex;
+  align-items: center;
+  gap: var(--tg-comments-text-gap);
+  min-height: var(--tg-comments-height);
+  padding: var(--tg-comments-pad-y) var(--tg-comments-pad-end) var(--tg-comments-pad-y) var(--tg-comments-pad-start);
+  border-top: 1px solid var(--tg-comments-border);
+  color: var(--tg-comments-text);
+  font-size: var(--tg-comments-size);
+  font-weight: var(--tg-comments-weight);
+}
+
+.tg-comments-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tg-comments-icon,
+.tg-comments-arrow {
+  width: var(--tg-comments-icon-size);
+  height: var(--tg-comments-icon-size);
+  color: var(--tg-comments-icon);
+  fill: currentColor;
+}
+
+.tg-bubble-wrap.with-comments {
+  min-width: max(var(--tg-bubble-min), var(--tg-comments-min-width));
+}
+
+/* A bot's inline keyboard under the bubble (docs/plan/19-x-proxies-server-media.md section
+   7.9): the message is as wide as the wider of the bubble and the buttons (Android's
+   keyboard may be wider still, --tg-kb-max). Above the keyboard the bubble has no tail
+   (Web K keeps it) and its own bottom corners; the buttons have the look's corners, and the
+   outer bottom corners of the last row the look's larger radius. The message column also
+   holds the reactions under media without a caption. */
+.tg-message {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: var(--tg-bubble-min);
+  max-width: max(var(--tg-bubble-max), var(--tg-kb-max));
+}
+
+.tg-bubble.with-keyboard {
+  border-bottom-right-radius: var(--tg-radius-keyboard);
+  border-bottom-left-radius: var(--tg-radius-keyboard);
+}
+
+.tg-bubble.has-tail.with-keyboard {
+  border-bottom-left-radius: var(--tg-tail-corner-keyboard);
+}
+
+.tg-bubble.with-keyboard .tg-media.alone,
+.tg-bubble.with-keyboard .tg-album.alone {
+  border-bottom-right-radius: calc(var(--tg-radius-keyboard) - var(--tg-media-inset));
+  border-bottom-left-radius: calc(var(--tg-radius-keyboard) - var(--tg-media-inset));
+}
+
+/* Grids of minmax(0, 1fr) columns: the buttons of a row are equally wide, the message is
+   at least as wide as the widest button times the buttons of its row, and a narrower
+   message shortens the labels instead of overflowing. */
+.tg-keyboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--tg-kb-row-gap);
+  margin: var(--tg-kb-top) calc(var(--tg-kb-overhang) * -1) 0;
+}
+
+.tg-kb-row {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--tg-kb-gap);
+}
+
+.tg-kb-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: var(--tg-kb-button-height);
+  min-height: var(--tg-kb-height);
+  padding: var(--tg-kb-pad-y) var(--tg-kb-pad-x);
+  border-radius: var(--tg-kb-radius);
+  background: var(--tg-kb-bg);
+  color: var(--tg-kb-text);
+  font-size: var(--tg-kb-font-size);
+  font-weight: var(--tg-kb-weight);
+  line-height: var(--tg-kb-line-height);
+  white-space: var(--tg-kb-white-space);
+  cursor: default;
+}
+
+.tg-kb-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The premium emoji before a button's text (the card look's button icons). */
+.tg-kb-icon {
+  margin-inline-end: 4px;
+}
+
+.tg-kb-row:last-child > .tg-kb-button:first-child {
+  border-bottom-left-radius: var(--tg-kb-last-radius);
+}
+
+.tg-kb-row:last-child > .tg-kb-button:last-child {
+  border-bottom-right-radius: var(--tg-kb-last-radius);
+}
+
+/* A styled button: its color at --tg-kb-style-alpha over the plain button's fill (Web A 50 %,
+   Android and iOS 70 %; 100 %: the color alone). */
+.tg-kb-button.success {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-kb-bg);
+  color: #ffffff;
+}
+
+.tg-kb-button.primary {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-kb-bg);
+  color: #ffffff;
+}
+
+.tg-kb-button.danger {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-kb-bg);
+  color: #ffffff;
+}
+
+/* The mark of a link or copy button in its top-right corner. */
+.tg-kb-mark {
+  position: absolute;
+  top: var(--tg-kb-icon-top);
+  right: var(--tg-kb-icon-end);
+  width: var(--tg-kb-icon);
+  height: var(--tg-kb-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+/* The share button beside channel posts (Desktop and the apps); where the app shows it only
+   while the mouse is over the post (Web A, Web K), a device with a mouse does the same. */
+.tg-share {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--tg-share-size);
+  height: var(--tg-share-size);
+  margin-left: var(--tg-share-gap);
+  border-radius: 50%;
+  background: var(--tg-share);
+  color: var(--tg-share-icon);
+}
+
+.tg-share-icon {
+  width: var(--tg-share-icon-size);
+  height: var(--tg-share-icon-size);
+  fill: currentColor;
+}
+
+@media (hover: hover) {
+  .tg-share.on-hover {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .tg-row:hover .tg-share.on-hover {
+    opacity: 1;
+  }
+}
+
+/* A message of emoji only, big and without a bubble (29 section 8.4); its info row on the
+   look's pill under the emoji. */
+.tg-big-emoji {
+  position: relative;
+  padding-bottom: calc(var(--tg-meta-overlay-height) + var(--tg-meta-overlay-bottom));
+}
+
+.tg-big-emoji-text {
+  font-size: var(--tg-big-emoji-size);
+  line-height: 1;
+  white-space: pre-wrap;
+}
+
+.tg-big-emoji-text img.tg-emoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: top;
+}
+
+/* A rich message (docs/plan/28-owner-list-2026-10-20.md section 14.5, RCH-04b): its blocks one
+   under the other in the bubble, approximated from Telegram's page blocks. The whole message
+   takes its direction (dir on .tg-rich): lists, tables and quotes mirror and every block is
+   aligned to its side, while each line keeps the order of its own letters. */
+.tg-rich {
+  display: flow-root;
+  padding: var(--tg-pad-top) var(--tg-pad-right) var(--tg-pad-bottom) var(--tg-pad-left);
+  overflow-wrap: anywhere;
+  text-align: left;
+  --tg-rich-line: color-mix(in srgb, var(--tg-text) 16%, transparent);
+}
+
+.tg-rich[dir='rtl'] {
+  text-align: right;
+}
+
+.tg-rich-blocks > * + * {
+  margin-top: 8px;
+}
+
+.tg-rich-blocks > * + .tg-rich-heading {
+  margin-top: 14px;
+}
+
+/* A look that spaces the blocks itself (SkinTokens.rich.gap: Web A, 29 section 8.4, TGP-02):
+   the same space under every block, less under a paragraph. */
+.tg-rich-blocks[data-gap] > * + * {
+  margin-top: var(--tg-rich-gap);
+}
+
+.tg-rich-blocks[data-gap] > .tg-rich-leaf:not(.tg-rich-heading, .tg-rich-math, :has(> .tg-pre, > .tg-quote)) + * {
+  margin-top: var(--tg-rich-paragraph-gap);
+}
+
+.tg-rich-leaf {
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-rich-leaf .tg-pre,
+.tg-rich-leaf .tg-quote {
+  margin: 0;
+}
+
+.tg-rich-heading {
+  font-weight: var(--tg-bold);
+  line-height: 1.25;
+}
+
+.tg-rich-heading.h1 {
+  font-size: 1.375em;
+}
+
+.tg-rich-heading.h2 {
+  font-size: 1.2em;
+}
+
+.tg-rich-heading.h3 {
+  font-size: 1.07em;
+}
+
+.tg-rich-pull {
+  font-style: italic;
+  text-align: center;
+}
+
+.tg-rich-math {
+  text-align: center;
+}
+
+.tg-rich-list {
+  margin: 0;
+  padding: 0;
+  padding-inline-start: 1.35em;
+}
+
+ul.tg-rich-list {
+  list-style: disc;
+}
+
+ul.tg-rich-list ul.tg-rich-list {
+  list-style: circle;
+}
+
+ul.tg-rich-list ul.tg-rich-list ul.tg-rich-list {
+  list-style: square;
+}
+
+ol.tg-rich-list {
+  list-style: decimal;
+}
+
+/* A numbered list with the look's own markers (SkinTokens.rich.marker: Web A): "1." in a box
+   aligned to its end, then the item's blocks. */
+ol.tg-rich-list.marked {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.tg-rich-item.marked {
+  display: flex;
+  gap: var(--tg-rich-marker-gap);
+}
+
+.tg-rich-item.marked > .tg-rich-item-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.tg-rich-marker {
+  flex: 0 0 auto;
+  min-width: var(--tg-rich-marker-width);
+  text-align: end;
+}
+
+.tg-rich-item-body > * + * {
+  margin-top: 2px;
+}
+
+.tg-rich-item + .tg-rich-item,
+.tg-rich-item > * + * {
+  margin-top: 2px;
+}
+
+.tg-rich-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.tg-rich-table {
+  border-collapse: collapse;
+  font-size: calc(var(--tg-font-size) - 1px);
+  line-height: 1.3;
+}
+
+.tg-rich-table th,
+.tg-rich-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--tg-rich-line);
+  text-align: inherit;
+  vertical-align: top;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-rich-table th {
+  background: var(--tg-code-bg);
+  font-weight: var(--tg-bold);
+}
+
+/* A table with round outer corners (SkinTokens.rich.tableRadius: Web A's 16): the cells' own
+   lines, above and at the start of each, under the last row and at the end of the last column,
+   as Web A draws them (RichContent.module.scss:318-361, in logical sides). */
+.tg-rich-table.round {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tg-rich-table.round th,
+.tg-rich-table.round td {
+  border-width: 1px 0 0;
+  border-inline-start-width: 1px;
+}
+
+.tg-rich-table.round tr:last-child > * {
+  border-bottom-width: 1px;
+}
+
+.tg-rich-table.round tr > :last-child {
+  border-inline-end-width: 1px;
+}
+
+.tg-rich-table.round tr:first-child > :first-child {
+  border-start-start-radius: var(--tg-rich-table-radius);
+}
+
+.tg-rich-table.round tr:first-child > :last-child {
+  border-start-end-radius: var(--tg-rich-table-radius);
+}
+
+.tg-rich-table.round tr:last-child > :first-child {
+  border-end-start-radius: var(--tg-rich-table-radius);
+}
+
+.tg-rich-table.round tr:last-child > :last-child {
+  border-end-end-radius: var(--tg-rich-table-radius);
+}
+
+.tg-rich-details {
+  border-top: 1px solid var(--tg-rich-line);
+  border-bottom: 1px solid var(--tg-rich-line);
+}
+
+.tg-rich-details + .tg-rich-details {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.tg-rich-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.tg-rich-summary-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: var(--tg-bold);
+}
+
+.tg-rich-chevron {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin: 0 4px 3px;
+  border-right: 2px solid var(--tg-meta);
+  border-bottom: 2px solid var(--tg-meta);
+  transform: rotate(45deg);
+}
+
+.tg-rich-details.open .tg-rich-chevron {
+  margin-bottom: -3px;
+  transform: rotate(225deg);
+}
+
+.tg-rich-details-body {
+  padding-bottom: 8px;
+}
+
+.tg-rich-divider {
+  height: 1px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  background: var(--tg-rich-line);
+}
+
+/* A row of buttons inside a rich message (xDesign, RICH-01; calibrate: O-02). */
+.tg-rich-buttons {
+  margin-top: 6px;
+}
+
+.tg-rich-figure {
+  margin: 0;
+}
+
+.tg-rich-picture,
+.tg-rich-slideshow {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--tg-radius-small);
+  background: var(--tg-code-bg);
+}
+
+.tg-rich-picture img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.tg-rich-caption {
+  margin-top: 4px;
+  color: var(--tg-meta);
+  font-size: calc(var(--tg-font-size) - 2px);
+}
+
+.tg-rich-collage {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--tg-album-gap);
+  overflow: hidden;
+  border-radius: var(--tg-radius-small);
+}
+
+.tg-rich-collage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.tg-rich-count {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tg-media-meta-bg);
+  color: #ffffff;
+  font-size: var(--tg-meta-size);
+}
+
+.tg-rich-map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 2 / 1;
+  border-radius: var(--tg-radius-small);
+  background: var(--tg-quote-bg);
+  color: var(--tg-accent);
+}
+
+.tg-rich-map-pin {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
+}
+
+.tg-rich-map-place {
+  direction: ltr;
+  font-size: var(--tg-meta-size);
+}
+
+/* Quotes of a right-to-left rich message have their bar on the right, as in Web A's
+   right-to-left text (.tg-text.rtl), unless the look sets each quote's side (data-dir). */
+.tg-rich[dir='rtl'] .tg-quote:not([data-dir]) {
+  padding: var(--tg-quote-pad-y) var(--tg-quote-pad-start) var(--tg-quote-pad-y) var(--tg-quote-pad-end);
+  box-shadow: inset calc(var(--tg-quote-bar) * -1) 0 0 var(--tg-quote-bar-color);
+}
+
+.tg-rich[dir='rtl'] .tg-quote:not([data-dir]) .tg-quote-icon {
+  right: auto;
+  left: var(--tg-quote-icon-end);
+}
+
+.tg-rich[dir='rtl'] .tg-quote:not([data-dir]) .tg-quote-chevron,
+.tg-rich[dir='rtl'] .tg-quote:not([data-dir]) .tg-quote-expand {
+  right: auto;
+  left: var(--tg-quote-expand-end);
+}
+
+.tg-rich[dir='rtl'] .tg-rich-count {
+  right: auto;
+  left: 8px;
+}
+
+/* A rich message alone, without the chat around it: a rich source post in a reader's Feed and
+   Browse (28 section 14.6, RCH-04b), in the bubble's colors and type. */
+.tg-card {
+  box-sizing: border-box;
+  width: var(--tg-frame-width);
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--tg-text) 12%, transparent);
+  border-radius: var(--tg-radius);
+  background: var(--tg-bubble);
+  color: var(--tg-text);
+  font-family: var(--tg-font);
+  font-size: var(--tg-font-size);
+  line-height: var(--tg-line-height);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.tg-card *,
+.tg-card *::before,
+.tg-card *::after {
+  box-sizing: border-box;
+}

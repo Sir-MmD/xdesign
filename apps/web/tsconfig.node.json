@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "scripts"],
+  // make gen-flags (scripts/gen-flags.ts) reads the language list of the SPA's code.
+  "references": [{ "path": "./tsconfig.app.json" }]
+}

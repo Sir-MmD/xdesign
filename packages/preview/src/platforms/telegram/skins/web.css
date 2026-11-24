@@ -1,0 +1,505 @@
+/* Telegram Web A's own rules (docs/plan/29-owner-list-2026-10-22.md section 8.4, TGP-03): what
+   this look draws differently from the shared rules of preview.css, which imports this file
+   into the preview's shadow root, from the measurement sheet .dev/upd29/tg/web-a.md and the
+   app's stylesheets it names (telegram-tt 12.0.47). Every rule is scoped by the look and
+   repeats the shared selector after it, so it wins over the shared rule:
+
+     [data-skin='web'] .tg-share { ... }
+     [data-skin='web'][data-theme='dark'] .tg-bubble { ... }
+     .tg-chat[data-skin='web'] { ... }    (the chat itself; the rich card is .tg-card)
+
+   Telegram's art for this look is var(--tg-art-<role>) (art/icons.ts). Values that are tokens
+   are in web.ts; this file holds the shapes and parts the tokens cannot draw. */
+
+/* --color-borders: the rules and frames of rich posts (themes.json:28). */
+.tg-chat[data-skin='web'],
+.tg-card[data-skin='web'] {
+  --tg-web-borders: #dadce0;
+}
+
+.tg-chat[data-skin='web'][data-theme='dark'],
+.tg-card[data-skin='web'][data-theme='dark'] {
+  --tg-web-borders: #303030;
+}
+
+/* The app's phone layout in a chat up to 600 px wide (its window up to 600 px): the column's
+   0.5rem padding with the message's 0.25rem indent (MessageList.scss:153, Message.scss:184-191)
+   and the top bar 0.5rem from the column's top and sides (_variables.scss:374,
+   MiddleHeader.scss:16-19); the widest bubble and media are in web.ts. */
+.tg-chat[data-skin='web'] {
+  container-type: inline-size;
+}
+
+@container (max-width: 600px) {
+  [data-skin='web'] .tg-header {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+  }
+
+  [data-skin='web'] .tg-list {
+    padding-top: 72px;
+  }
+
+  [data-skin='web'] .tg-row {
+    padding-right: 8px;
+    padding-left: 12px;
+  }
+}
+
+/* The tail's shadow stays in its 9 x 18 box, as the app clips its SVG (overflow: hidden,
+   _message-content.scss:509-516): 1 px of it shows under the bubble. The tail is drawn over the
+   bubble's shadow, as the app's tail inside the bubble is (Message.tsx:2045; RVW-29c). */
+[data-skin='web'] .tg-tail {
+  z-index: 1;
+  clip-path: inset(0);
+}
+
+/* The tail is drawn under a picture but not under a video or an animation without a caption
+   (buildContentClassName.ts:218-220: a photo, text or the comments bar), and the last bubble's
+   bottom-left corner without a tail is the small radius (Message.scss:177-182). */
+[data-skin='web'] .tg-bubble-wrap:has(> .tg-bubble > .tg-media.alone > .tg-play):not(:has(.tg-comments)) {
+  --tg-tail-corner: var(--tg-radius-small);
+}
+
+[data-skin='web'] .tg-bubble-wrap:has(> .tg-bubble > .tg-media.alone > .tg-play):not(:has(.tg-comments)) > .tg-tail {
+  display: none;
+}
+
+/* After right-to-left text the info row floats left, 4 px into the left padding, and keeps
+   7 - 4 = 3 px more than itself on the line (_message-content.scss:178-183). */
+[data-skin='web'] .tg-meta.left {
+  left: 4px;
+}
+
+[data-skin='web'] .tg-meta-spacer.left {
+  margin-right: 3px;
+  margin-left: 0;
+}
+
+/* A quote in the text is as wide as its own text (blockquote: inline-block, max-width 100 %,
+   _message-content.scss:1086-1096), on the message's start side, and clips its text; a folded
+   one is four lines tall in all, its text fading over the last 16 px under the 2 px above it
+   (Blockquote.module.scss:8-24). */
+[data-skin='web'] .tg-text .tg-quote {
+  width: fit-content;
+  max-width: 100%;
+}
+
+[data-skin='web'] .tg-text.rtl .tg-quote {
+  margin-left: auto;
+}
+
+[data-skin='web'] .tg-quote {
+  overflow: hidden;
+}
+
+[data-skin='web'] .tg-quote.folded {
+  max-height: calc(var(--tg-quote-lines) * 1lh);
+}
+
+/* An expandable quote keeps 1.5rem on its right for its arrow, which sits in a 1.5rem box at the
+   quote's bottom-right corner, also after right-to-left text (the app's physical right): the
+   icon font's down arrow, the up arrow once open, 14 px in the text's color
+   (Blockquote.module.scss:12-14,26-37; Blockquote.tsx:83-91). The right-to-left selectors
+   outweigh the shared rules that mirror a quote (preview.css; RVW-29c). */
+[data-skin='web'] .tg-quote.folded,
+[data-skin='web'] .tg-quote.expandable,
+[data-skin='web'] .tg-text.rtl .tg-quote.folded,
+[data-skin='web'] .tg-text.rtl .tg-quote.expandable,
+[data-skin='web'] .tg-rich[dir='rtl'] .tg-quote.folded,
+[data-skin='web'] .tg-rich[dir='rtl'] .tg-quote.expandable {
+  padding-right: 24px;
+}
+
+[data-skin='web'] .tg-quote-expand,
+[data-skin='web'] .tg-text.rtl .tg-quote:not([data-dir]) .tg-quote-expand,
+[data-skin='web'] .tg-rich[dir='rtl'] .tg-quote:not([data-dir]) .tg-quote-expand {
+  right: 0;
+  left: auto;
+  color: var(--tg-text);
+  -webkit-mask-size: 14px 14px;
+  mask-size: 14px 14px;
+}
+
+[data-skin='web'] .tg-quote-expand.open {
+  transform: none;
+  -webkit-mask-image: var(--tg-art-quote-collapse);
+  mask-image: var(--tg-art-quote-collapse);
+}
+
+/* A code block keeps the code's fill under its bar and language in the channel's color
+   (CodeBlock.scss:15 after PeerColorWrapper.module.scss:14); the language is one line, 8 px
+   over the code (CodeBlock.scss:17-27). */
+[data-skin='web'] .tg-pre {
+  background: var(--tg-code-bg);
+}
+
+[data-skin='web'] .tg-pre-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-skin='web'] .tg-pre-header + .tg-pre-body {
+  padding-top: 0;
+}
+
+/* In a message that starts right to left the code block takes the message's direction (it has no
+   dir of its own and logical sides, CodeBlock.tsx:44-57, PeerColorWrapper.module.scss:1-30): its
+   bar, its 9 px start and its language on the right, and its code laid out right to left, as the
+   app lays it out (a pre without dir="auto" has no plaintext rule; RVW-29c). */
+[data-skin='web'] .tg-text.rtl .tg-pre {
+  box-shadow: inset calc(var(--tg-code-bar) * -1) 0 0 var(--tg-pre-bar);
+  direction: rtl;
+}
+
+[data-skin='web'] .tg-text.rtl .tg-pre-header,
+[data-skin='web'] .tg-text.rtl .tg-pre-body {
+  padding-right: 9px;
+  padding-left: 6px;
+}
+
+[data-skin='web'] .tg-text.rtl .tg-pre-body {
+  unicode-bidi: isolate;
+}
+
+/* A spoiler: the app's picture of dots, black or white by the theme, 18 px tall at most,
+   pulsing down to a quarter (Spoiler.scss:1-50). */
+[data-skin='web'] .tg-spoiler:not(.shown) {
+  background-image: var(--tg-art-spoiler);
+  background-size: auto min(100%, 18px);
+  animation: tg-web-spoiler 1.75s linear infinite;
+}
+
+@keyframes tg-web-spoiler {
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  75% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin='web'] .tg-spoiler:not(.shown) {
+    animation: none;
+  }
+}
+
+/* No play button over videos and animations: Web A plays them in the chat, muted, at its
+   default performance level (initialState.ts:22-25,104; selectors/ui.ts:141-154;
+   Video.tsx:123,181). */
+[data-skin='web'] .tg-play {
+  display: none;
+}
+
+/* Big emoji (_message-content.scss:886-943): the text at 90 % of the emoji's size on lines as
+   tall as the emoji, the pictures on its baseline; the info row's pill 2 px under the text at
+   its right (bottom: -1.25rem, right: 0). */
+[data-skin='web'] .tg-big-emoji {
+  padding-bottom: 20px;
+}
+
+[data-skin='web'] .tg-big-emoji-text {
+  font-size: calc(var(--tg-big-emoji-size) * 0.9);
+  line-height: var(--tg-big-emoji-size);
+}
+
+[data-skin='web'] .tg-big-emoji-text img.tg-emoji {
+  width: var(--tg-big-emoji-size);
+  height: var(--tg-big-emoji-size);
+  vertical-align: baseline;
+}
+
+[data-skin='web'] .tg-meta.overlay.big {
+  right: 0;
+  bottom: 0;
+}
+
+/* Reactions (Reactions.scss:1-11, ReactionButton.module.scss): the emoji with 4 px around it
+   and the counts in tabular figures. In the bubble they come 4 px under the text, which then
+   keeps no room for the info row, and 3 px over the bubble's padding; the info row ends their
+   last row, on the bubble's right edge and 3 px above its bottom, or on the comments bar's line
+   (reactions-offset, _message-content.scss:187-199; Message.tsx:1196-1239). */
+[data-skin='web'] .tg-reaction {
+  font-variant-numeric: tabular-nums;
+}
+
+[data-skin='web'] .tg-reaction img.tg-emoji {
+  margin: 4px;
+}
+
+[data-skin='web'] .tg-body > .tg-text:has(+ .tg-reactions) {
+  padding-bottom: 0;
+}
+
+[data-skin='web'] .tg-body > .tg-reactions {
+  padding-bottom: 9px;
+}
+
+[data-skin='web'] .tg-body > .tg-reactions + .tg-meta {
+  right: 0;
+  bottom: 3px;
+}
+
+[data-skin='web'] .tg-body:has(+ .tg-comments) > .tg-reactions {
+  padding-bottom: 6px;
+}
+
+[data-skin='web'] .tg-body:has(+ .tg-comments) > .tg-reactions + .tg-meta {
+  bottom: 0;
+}
+
+/* The comments bar's icon is 25 px (CommentButton.scss:184-188) and its label one line
+   (CommentButton.scss:28-31). */
+[data-skin='web'] .tg-comments-icon {
+  width: 25px;
+  height: 25px;
+}
+
+[data-skin='web'] .tg-comments-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The link preview's site name and title in medium weight, each 2 px over the next line, and
+   its description on lines of 1.25 (WebPage.scss:174-197). */
+[data-skin='web'] .tg-webpage-site,
+[data-skin='web'] .tg-webpage-title {
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+[data-skin='web'] .tg-webpage-desc {
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+
+/* The small picture (with-square-photo): 80 px with 6 px corners at the box's end, 4 px under
+   the top of its content, 16 px from the text, which keeps at least the picture's 84 px beside
+   it (WebPage.scss:105-118, 140-171; Message.scss:829-836, 842-844; RVW-29c). */
+[data-skin='web'] .tg-webpage.with-thumb {
+  position: relative;
+}
+
+[data-skin='web'] .tg-webpage.with-thumb .tg-webpage-text {
+  min-height: calc(var(--tg-webpage-thumb) + 4px);
+  margin-right: calc(var(--tg-webpage-thumb) + 16px);
+}
+
+[data-skin='web'] .tg-webpage-thumb {
+  position: absolute;
+  top: 7px;
+  right: 6px;
+  margin: 0;
+  border-radius: 6px;
+}
+
+/* The large picture, by the same media rule: 4 px above it, after the 2 px under the text's last
+   part that the text's column keeps (WebPage.scss:88-94, 174-197), 3 px under it and 6 px
+   corners (WebPage.scss:105-118; Message.scss:829-836, 842-844; RVW-29c). */
+[data-skin='web'] .tg-webpage-text {
+  display: flow-root;
+}
+
+[data-skin='web'] .tg-webpage-photo {
+  margin: 4px 0 3px;
+  border-radius: 6px;
+}
+
+/* The link preview takes the direction of its title and description (Post.tsx marks it
+   data-dir rtl, as the app's dir="auto" box): then its bar and 9 px start are on the right, its
+   lines start there and its small picture is on the left (PeerColorWrapper.module.scss:1-30,
+   WebPage.scss:88-94, 140-171). Its site name keeps its own direction at the box's start
+   (SafeLink.tsx:90 in a column that starts each line at the box's start; RVW-29c). */
+[data-skin='web'] .tg-webpage-site {
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+
+[data-skin='web'] .tg-webpage[data-dir='rtl'] {
+  padding: 3px 9px 3px 6px;
+  box-shadow: inset calc(var(--tg-webpage-bar) * -1) 0 0 var(--tg-webpage-accent);
+  direction: rtl;
+}
+
+[data-skin='web'] .tg-webpage[data-dir='rtl'] .tg-webpage-site {
+  text-align: right;
+}
+
+[data-skin='web'] .tg-webpage[data-dir='rtl'].with-thumb .tg-webpage-text {
+  margin-right: 0;
+  margin-left: calc(var(--tg-webpage-thumb) + 16px);
+}
+
+[data-skin='web'] .tg-webpage[data-dir='rtl'] .tg-webpage-thumb {
+  right: auto;
+  left: 6px;
+}
+
+/* The marks of the buttons (InlineButtons.tsx:32-58, InlineButtons.module.scss:54-69): a
+   link's arrow turned up to the right; a copy button's sheets 14 px at 3 px from the corner; no
+   mark on a link to Telegram (RE_TME_LINK, config.ts:347: here its usual spellings), and the
+   mini app's mark on one that opens a mini app (?startapp). Emoji in a label are 16 px
+   (Button.scss:298). */
+[data-skin='web'] .tg-kb-button[data-kind='url'] .tg-kb-mark {
+  transform: rotate(-45deg);
+}
+
+[data-skin='web'] .tg-kb-button[data-kind='copy'] .tg-kb-mark {
+  top: 3px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+}
+
+[data-skin='web']
+  .tg-kb-button[data-kind='url']:is(
+    [title^='https://t.me/' i],
+    [title^='http://t.me/' i],
+    [title^='t.me/' i],
+    [title^='https://telegram.me/' i],
+    [title^='http://telegram.me/' i],
+    [title^='telegram.me/' i],
+    [title^='https://telegram.dog/' i],
+    [title^='http://telegram.dog/' i],
+    [title^='telegram.dog/' i]
+  )
+  .tg-kb-mark {
+  display: none;
+}
+
+[data-skin='web'] .tg-kb-button[data-kind='url'][title*='?startapp'] .tg-kb-mark {
+  top: 3px;
+  right: 3px;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  transform: none;
+  -webkit-mask-image: var(--tg-art-web-app);
+  mask-image: var(--tg-art-web-app);
+}
+
+[data-skin='web'] .tg-kb-text img.tg-emoji {
+  width: 16px;
+  height: 16px;
+  vertical-align: baseline;
+}
+
+/* A rich post as Web A draws it, with its Instant View renderer at 16 / 18 of its size
+   (MessageRichText.tsx:118-141, RichContent.module.scss:1-108, config.ts:155): 16 px text on
+   20 px lines; headings in medium weight, the first level 19.6 px on lines of 1.25, the second
+   16.9 px and centred, the others 16 px; quotes, tables and the details' summary 15.1 px; lists
+   20 px in; a rule 12 px from its neighbors; cells with 6 px around their text; details in a
+   1 px frame with radius 8 and 4 px inside. */
+[data-skin='web'] .tg-rich {
+  line-height: 20px;
+}
+
+[data-skin='web'] .tg-rich-heading {
+  font-weight: 500;
+  line-height: 20px;
+}
+
+[data-skin='web'] .tg-rich-heading.h1 {
+  font-size: 19.56px;
+  line-height: 1.25;
+}
+
+[data-skin='web'] .tg-rich-heading.h2 {
+  font-size: 16.89px;
+  text-align: center;
+}
+
+[data-skin='web'] .tg-rich-heading.h3 {
+  font-size: 16px;
+}
+
+[data-skin='web'] .tg-rich .tg-quote {
+  font-size: 15.11px;
+  line-height: 20px;
+}
+
+[data-skin='web'] .tg-rich-table,
+[data-skin='web'] .tg-rich-summary-text {
+  font-size: 15.11px;
+}
+
+[data-skin='web'] .tg-rich-list {
+  padding-inline-start: 20px;
+}
+
+/* A bulleted item's blocks 4 px toward the bullet (RichContent.module.scss:200-202); a table as
+   wide as the post with 8 px under it, its header cells in the normal weight (:311-366); a code
+   block 4 px from a paragraph and from the block after it (CodeBlock.scss:8-9, its margins
+   meeting a paragraph's 2). The numbered markers and the table's corners are tokens (web.ts). */
+[data-skin='web'] ul.tg-rich-list > .tg-rich-item > * {
+  margin-inline-start: -4px;
+}
+
+[data-skin='web'] .tg-rich-table {
+  width: 100%;
+}
+
+[data-skin='web'] .tg-rich-table th {
+  font-weight: 400;
+}
+
+[data-skin='web'] .tg-rich-blocks > .tg-rich-table-wrap + * {
+  margin-top: 8px;
+}
+
+[data-skin='web'] .tg-rich-blocks > .tg-rich-leaf:has(> .tg-pre) + :not(.tg-rich-divider),
+[data-skin='web']
+  .tg-rich-blocks
+  > .tg-rich-leaf:not(.tg-rich-heading, .tg-rich-math, :has(> .tg-pre, > .tg-quote))
+  + .tg-rich-leaf:has(> .tg-pre) {
+  margin-top: 4px;
+}
+
+[data-skin='web'] .tg-rich-table th,
+[data-skin='web'] .tg-rich-table td {
+  padding: 6px;
+  border-color: var(--tg-web-borders);
+}
+
+[data-skin='web'] .tg-rich-divider {
+  margin: 12px 0;
+  background: var(--tg-web-borders);
+}
+
+[data-skin='web'] .tg-rich-details {
+  padding: 4px;
+  border: 1px solid var(--tg-web-borders);
+  border-radius: 8px;
+}
+
+[data-skin='web'] .tg-rich-details + .tg-rich-details {
+  margin-top: 12px;
+  border-top: 1px solid var(--tg-web-borders);
+}
+
+/* The private chat (PRV-02; calibrate: O-02): the composer's plate, its round button and the
+   Start plate cast the bubble's shadow; in the commands menu a command stands over its
+   description. */
+[data-skin='web'] .tg-composer,
+[data-skin='web'] .tg-send-button,
+[data-skin='web'] .tg-start-button {
+  box-shadow: 0 1px 2px var(--tg-shadow);
+}
+
+[data-skin='web'] .tg-command-text {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+[data-skin='web'] .tg-command-main {
+  font-weight: 500;
+}

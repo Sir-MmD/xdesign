@@ -1,0 +1,5315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "xdesign.bot-spec"
+    },
+    "formatVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "exportedAt": {
+      "type": "string"
+    },
+    "exportedBy": {
+      "type": "string"
+    },
+    "design": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[\\w-]{1,64}$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "docVersion": {
+          "type": "number"
+        },
+        "versionName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "docVersion",
+        "versionName"
+      ]
+    },
+    "telegram": {
+      "type": "object",
+      "properties": {
+        "botApi": {
+          "type": "string"
+        },
+        "chats": {
+          "type": "string",
+          "const": "private"
+        }
+      },
+      "required": [
+        "botApi",
+        "chats"
+      ]
+    },
+    "languages": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+        },
+        "all": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+          }
+        },
+        "rightToLeft": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+          }
+        }
+      },
+      "required": [
+        "default",
+        "all",
+        "rightToLeft"
+      ]
+    },
+    "bot": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/LangText"
+        },
+        "about": {
+          "$ref": "#/$defs/LangText"
+        },
+        "description": {
+          "$ref": "#/$defs/LangText"
+        },
+        "photo": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "menuButton": {
+          "type": "string",
+          "enum": [
+            "commands",
+            "default"
+          ]
+        },
+        "commandOrder": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          }
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "description": {
+                "$ref": "#/$defs/LangText"
+              },
+              "startPoint": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "required": [
+              "command",
+              "description",
+              "startPoint"
+            ]
+          }
+        }
+      },
+      "required": [
+        "name",
+        "about",
+        "description",
+        "photo",
+        "menuButton",
+        "commandOrder",
+        "commands"
+      ]
+    },
+    "startPoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/IdName"
+          },
+          "title": {
+            "type": "string"
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "cameFrom": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Ref"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "const": "start"
+          },
+          "trigger": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "command"
+                  },
+                  "command": {
+                    "type": "string"
+                  },
+                  "inMenu": {
+                    "type": "boolean"
+                  },
+                  "menuDescription": {
+                    "$ref": "#/$defs/LangText"
+                  }
+                },
+                "required": [
+                  "type",
+                  "command",
+                  "inMenu",
+                  "menuDescription"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "startLink"
+                  },
+                  "payload": {
+                    "type": "string"
+                  },
+                  "match": {
+                    "type": "string",
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  "saveRestTo": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "payload",
+                  "match",
+                  "saveRestTo"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "fallback"
+                  },
+                  "accepts": {
+                    "type": "string",
+                    "enum": [
+                      "any",
+                      "text",
+                      "media"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "accepts"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "paymentDone"
+                  },
+                  "invoice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "invoice"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "refunded"
+                  },
+                  "invoice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "invoice"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "subscriptionChanged"
+                  },
+                  "invoice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "state": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "canceled",
+                          "active",
+                          "failed"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "invoice",
+                  "state"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "userBlocks"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "userRestarts"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "broadcast"
+                  },
+                  "audience": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "everyone"
+                      },
+                      {
+                        "$ref": "#/$defs/Condition"
+                      }
+                    ]
+                  },
+                  "when": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "audience",
+                  "when"
+                ]
+              }
+            ]
+          },
+          "next": {
+            "$ref": "#/$defs/Target"
+          },
+          "telegram": {
+            "type": "object",
+            "properties": {
+              "update": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "status": {
+                "type": "string"
+              },
+              "command": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payload": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "match": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "update",
+              "command",
+              "payload",
+              "match"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "section",
+          "note",
+          "cameFrom",
+          "kind",
+          "trigger",
+          "next",
+          "telegram"
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Step"
+      }
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/IdName"
+              },
+              "kind": {
+                "type": "string",
+                "const": "rows"
+              },
+              "name": {
+                "type": "string"
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "inline",
+                  "reply"
+                ]
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Button"
+                  }
+                }
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "place",
+              "rows"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/IdName"
+              },
+              "kind": {
+                "type": "string",
+                "const": "text"
+              },
+              "name": {
+                "type": "string"
+              },
+              "text": {
+                "$ref": "#/$defs/RichText"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "text"
+            ]
+          }
+        ]
+      }
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "yesNo",
+              "phone",
+              "location",
+              "file",
+              "users",
+              "chat",
+              "poll"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "question",
+              "remember",
+              "devStep",
+              "button",
+              "startLink",
+              "builtin"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "testValue": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "id": {
+            "$ref": "#/$defs/IdName"
+          }
+        },
+        "required": [
+          "label",
+          "type",
+          "source",
+          "id"
+        ]
+      }
+    },
+    "testSwitches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "yesNo",
+              "choice"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "testValue": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/$defs/IdName"
+          }
+        },
+        "required": [
+          "label",
+          "type",
+          "testValue",
+          "id"
+        ]
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Ref"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "photo",
+                  "livePhoto",
+                  "video",
+                  "animation",
+                  "audio",
+                  "voice",
+                  "document",
+                  "videoNote",
+                  "sticker"
+                ]
+              },
+              "file": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "bytes": {
+                "type": "number"
+              },
+              "width": {
+                "type": "number"
+              },
+              "height": {
+                "type": "number"
+              },
+              "durationMs": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "file",
+              "name",
+              "mime",
+              "bytes"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Ref"
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "photo",
+                      "livePhoto",
+                      "video",
+                      "animation",
+                      "audio",
+                      "voice",
+                      "document",
+                      "videoNote",
+                      "sticker"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "placeholder": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "placeholder"
+            ]
+          }
+        ]
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "code": {
+            "type": "string"
+          },
+          "where": {
+            "type": "string"
+          },
+          "button": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ignored": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "level",
+          "code",
+          "where",
+          "message"
+        ]
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/IdName"
+          },
+          "title": {
+            "type": "string"
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Ref"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "section",
+          "note",
+          "text",
+          "color",
+          "steps"
+        ]
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/IdName"
+          },
+          "title": {
+            "type": "string"
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Ref"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "section",
+          "note",
+          "width",
+          "height",
+          "color",
+          "steps"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "formatVersion",
+    "exportedAt",
+    "exportedBy",
+    "design",
+    "telegram",
+    "languages",
+    "bot",
+    "startPoints",
+    "steps",
+    "parts",
+    "variables",
+    "testSwitches",
+    "media",
+    "checks",
+    "notes",
+    "sections"
+  ],
+  "title": "xDesign bot spec, format version 1",
+  "description": "spec.json of an xDesign export: one Telegram bot design, Bot API 10.5.",
+  "$defs": {
+    "LangText": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "A plain text per language."
+    },
+    "Ref": {
+      "type": "string",
+      "pattern": "^[\\w-]{1,64}$",
+      "description": "The ID name of a step, button, variable, switch or part, or the id of a media entry."
+    },
+    "IdName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "description": "An ID name: a letter a to z, then up to 47 of a to z, 0 to 9 and _."
+    },
+    "Condition": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "var": {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "isSet",
+                          "isEmpty",
+                          "equals",
+                          "notEquals",
+                          "contains",
+                          "startsWith",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte"
+                        ]
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "var": {
+                                "$ref": "#/$defs/Ref"
+                              }
+                            },
+                            "required": [
+                              "var"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "var",
+                      "op"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "switch": {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      "is": {
+                        "type": [
+                          "boolean",
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "switch",
+                      "is"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "memberOf": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "memberOf"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "hasPaid": {
+                        "$ref": "#/$defs/Ref"
+                      }
+                    },
+                    "required": [
+                      "hasPaid"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "subscribed": {
+                        "$ref": "#/$defs/Ref"
+                      }
+                    },
+                    "required": [
+                      "subscribed"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "all"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "var": {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "isSet",
+                          "isEmpty",
+                          "equals",
+                          "notEquals",
+                          "contains",
+                          "startsWith",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte"
+                        ]
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "var": {
+                                "$ref": "#/$defs/Ref"
+                              }
+                            },
+                            "required": [
+                              "var"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "var",
+                      "op"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "switch": {
+                        "$ref": "#/$defs/Ref"
+                      },
+                      "is": {
+                        "type": [
+                          "boolean",
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "switch",
+                      "is"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "memberOf": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "memberOf"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "hasPaid": {
+                        "$ref": "#/$defs/Ref"
+                      }
+                    },
+                    "required": [
+                      "hasPaid"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "subscribed": {
+                        "$ref": "#/$defs/Ref"
+                      }
+                    },
+                    "required": [
+                      "subscribed"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "any"
+          ]
+        }
+      ],
+      "description": "All or any of the items hold."
+    },
+    "Target": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "back"
+            },
+            {
+              "$ref": "#/$defs/Ref"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The ID name of the step an arrow goes to, \"back\" for the message step the user came from, or null for no arrow."
+    },
+    "Step": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "message"
+            },
+            "message": {
+              "$ref": "#/$defs/Message"
+            },
+            "keyboard": {
+              "$ref": "#/$defs/Keyboard"
+            },
+            "options": {
+              "$ref": "#/$defs/Options"
+            },
+            "next": {
+              "$ref": "#/$defs/Target"
+            },
+            "onStop": {
+              "$ref": "#/$defs/Target"
+            },
+            "telegram": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "parseMode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "HTML"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "replyMarkup": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "InlineKeyboardMarkup",
+                        "ReplyKeyboardMarkup",
+                        "ReplyKeyboardRemove",
+                        "ForceReply"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "saveFrom": {
+                  "type": "string",
+                  "enum": [
+                    "poll_answer.option_ids",
+                    "result.dice.value"
+                  ]
+                },
+                "draftMethod": {
+                  "type": "string",
+                  "enum": [
+                    "sendMessageDraft",
+                    "sendRichMessageDraft"
+                  ]
+                },
+                "draftStop": {
+                  "type": "object",
+                  "properties": {
+                    "can_stop": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "keep_on_stop": {
+                      "type": "boolean"
+                    },
+                    "update": {
+                      "type": "string",
+                      "const": "stopped_message_generation"
+                    }
+                  },
+                  "required": [
+                    "can_stop",
+                    "keep_on_stop",
+                    "update"
+                  ]
+                }
+              },
+              "required": [
+                "method",
+                "parseMode",
+                "replyMarkup"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "message",
+            "keyboard",
+            "options",
+            "next",
+            "telegram"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "question"
+            },
+            "prompt": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/Message"
+                },
+                "keyboard": {
+                  "$ref": "#/$defs/Keyboard"
+                },
+                "options": {
+                  "$ref": "#/$defs/Options"
+                }
+              },
+              "required": [
+                "message",
+                "keyboard",
+                "options"
+              ]
+            },
+            "expects": {
+              "type": "string",
+              "enum": [
+                "text",
+                "number",
+                "email",
+                "phone",
+                "location",
+                "photo",
+                "video",
+                "file",
+                "voice",
+                "audio",
+                "any"
+              ]
+            },
+            "checks": {
+              "type": "object",
+              "properties": {
+                "minLength": {
+                  "type": "number"
+                },
+                "maxLength": {
+                  "type": "number"
+                },
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "wholeNumber": {
+                  "type": "boolean"
+                },
+                "pattern": {
+                  "type": "string",
+                  "enum": [
+                    "email",
+                    "url",
+                    "phone",
+                    "date"
+                  ]
+                },
+                "maxFileMb": {
+                  "type": "number"
+                },
+                "fileTypes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "saveTo": {
+              "$ref": "#/$defs/Ref"
+            },
+            "wrongAnswer": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/RichText"
+                },
+                "maxTries": {
+                  "type": "number"
+                },
+                "afterMaxTries": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "message",
+                "afterMaxTries"
+              ]
+            },
+            "cancel": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "words": {
+                      "$ref": "#/$defs/LangText"
+                    },
+                    "goTo": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Ref"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "words",
+                    "goTo"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Ref"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "telegram": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "parseMode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "HTML"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "replyMarkup": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "InlineKeyboardMarkup",
+                        "ReplyKeyboardMarkup",
+                        "ReplyKeyboardRemove",
+                        "ForceReply"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "saveFrom": {
+                  "type": "string",
+                  "enum": [
+                    "poll_answer.option_ids",
+                    "result.dice.value"
+                  ]
+                },
+                "draftMethod": {
+                  "type": "string",
+                  "enum": [
+                    "sendMessageDraft",
+                    "sendRichMessageDraft"
+                  ]
+                },
+                "draftStop": {
+                  "type": "object",
+                  "properties": {
+                    "can_stop": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "keep_on_stop": {
+                      "type": "boolean"
+                    },
+                    "update": {
+                      "type": "string",
+                      "const": "stopped_message_generation"
+                    }
+                  },
+                  "required": [
+                    "can_stop",
+                    "keep_on_stop",
+                    "update"
+                  ]
+                },
+                "waitsFor": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "method",
+                "parseMode",
+                "replyMarkup",
+                "waitsFor"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "prompt",
+            "expects",
+            "checks",
+            "saveTo",
+            "wrongAnswer",
+            "cancel",
+            "next",
+            "telegram"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "if"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "when": {
+                    "$ref": "#/$defs/Condition"
+                  },
+                  "say": {
+                    "type": "string"
+                  },
+                  "goTo": {
+                    "$ref": "#/$defs/Target"
+                  }
+                },
+                "required": [
+                  "label",
+                  "when",
+                  "say",
+                  "goTo"
+                ]
+              }
+            },
+            "otherwise": {
+              "$ref": "#/$defs/Target"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "cases",
+            "otherwise"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "remember"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RememberAction"
+              }
+            },
+            "next": {
+              "$ref": "#/$defs/Target"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "actions",
+            "next"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "wait"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "seconds",
+                "minutes",
+                "hours",
+                "days"
+              ]
+            },
+            "ifUserActs": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "keep"
+              ]
+            },
+            "stopWhen": {
+              "$ref": "#/$defs/Condition"
+            },
+            "next": {
+              "$ref": "#/$defs/Target"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "amount",
+            "unit",
+            "ifUserActs",
+            "next"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "devStep"
+            },
+            "description": {
+              "type": "string"
+            },
+            "uses": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "sets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "outcomes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "goTo": {
+                    "$ref": "#/$defs/Target"
+                  }
+                },
+                "required": [
+                  "label",
+                  "goTo"
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "description",
+            "uses",
+            "sets",
+            "outcomes"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "goTo"
+            },
+            "target": {
+              "$ref": "#/$defs/Target"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "target"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "end"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "invoice"
+            },
+            "invoice": {
+              "$ref": "#/$defs/Invoice"
+            },
+            "keyboard": {
+              "$ref": "#/$defs/Keyboard"
+            },
+            "options": {
+              "$ref": "#/$defs/Options"
+            },
+            "checkout": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "refuse": {
+                      "$ref": "#/$defs/LangText"
+                    }
+                  },
+                  "required": [
+                    "description",
+                    "refuse"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next": {
+              "$ref": "#/$defs/Target"
+            },
+            "telegram": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "parseMode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "HTML"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "replyMarkup": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "InlineKeyboardMarkup",
+                        "ReplyKeyboardMarkup",
+                        "ReplyKeyboardRemove",
+                        "ForceReply"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "saveFrom": {
+                  "type": "string",
+                  "enum": [
+                    "poll_answer.option_ids",
+                    "result.dice.value"
+                  ]
+                },
+                "draftMethod": {
+                  "type": "string",
+                  "enum": [
+                    "sendMessageDraft",
+                    "sendRichMessageDraft"
+                  ]
+                },
+                "draftStop": {
+                  "type": "object",
+                  "properties": {
+                    "can_stop": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "keep_on_stop": {
+                      "type": "boolean"
+                    },
+                    "update": {
+                      "type": "string",
+                      "const": "stopped_message_generation"
+                    }
+                  },
+                  "required": [
+                    "can_stop",
+                    "keep_on_stop",
+                    "update"
+                  ]
+                },
+                "payment": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "method",
+                "parseMode",
+                "replyMarkup",
+                "payment"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "invoice",
+            "keyboard",
+            "options",
+            "checkout",
+            "next",
+            "telegram"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/IdName"
+            },
+            "title": {
+              "type": "string"
+            },
+            "section": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "cameFrom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "action"
+            },
+            "action": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "react"
+                    },
+                    "emoji": {
+                      "type": "string"
+                    },
+                    "onStep": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "const": "userMessage"
+                            },
+                            {
+                              "$ref": "#/$defs/Ref"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "big": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "emoji",
+                    "onStep"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "pin"
+                    },
+                    "step": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Ref"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "step"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "unpin"
+                    },
+                    "step": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Ref"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "step"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "delete"
+                    },
+                    "step": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Ref"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "step"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "gift"
+                    },
+                    "giftDescription": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "$ref": "#/$defs/RichText"
+                    },
+                    "payForUpgrade": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "giftDescription"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "chatAction"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "typing",
+                        "upload_photo",
+                        "record_video",
+                        "upload_video",
+                        "record_voice",
+                        "upload_voice",
+                        "upload_document",
+                        "choose_sticker",
+                        "find_location",
+                        "record_video_note",
+                        "upload_video_note"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "action"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "refund"
+                    },
+                    "invoice": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Ref"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "invoice"
+                  ]
+                }
+              ]
+            },
+            "next": {
+              "$ref": "#/$defs/Target"
+            },
+            "telegram": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "emoji": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "emoji"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "method"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "section",
+            "note",
+            "cameFrom",
+            "kind",
+            "action",
+            "next",
+            "telegram"
+          ]
+        }
+      ],
+      "description": "A step: a box on the map with its arrows by ID name."
+    },
+    "Message": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "text"
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "photo",
+                "livePhoto",
+                "video",
+                "animation"
+              ]
+            },
+            "media": {
+              "$ref": "#/$defs/Ref"
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            },
+            "spoiler": {
+              "type": "boolean"
+            },
+            "captionAbove": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "media"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "audio"
+            },
+            "media": {
+              "$ref": "#/$defs/Ref"
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            },
+            "title": {
+              "type": "string"
+            },
+            "performer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "media"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "voice",
+                "document"
+              ]
+            },
+            "media": {
+              "$ref": "#/$defs/Ref"
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            }
+          },
+          "required": [
+            "type",
+            "media"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "videoNote",
+                "sticker"
+              ]
+            },
+            "media": {
+              "$ref": "#/$defs/Ref"
+            }
+          },
+          "required": [
+            "type",
+            "media"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "album"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "media": {
+                    "$ref": "#/$defs/Ref"
+                  },
+                  "caption": {
+                    "$ref": "#/$defs/RichText"
+                  },
+                  "spoiler": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "media"
+                ]
+              }
+            }
+          },
+          "required": [
+            "type",
+            "items"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "location"
+            },
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            },
+            "livePeriodSec": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "latitude",
+            "longitude"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "venue"
+            },
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            },
+            "title": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "latitude",
+            "longitude",
+            "title",
+            "address"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "contact"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "phone",
+            "firstName"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "poll"
+            },
+            "question": {
+              "$ref": "#/$defs/RichText"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/LangText"
+              }
+            },
+            "anonymous": {
+              "type": "boolean"
+            },
+            "multiple": {
+              "type": "boolean"
+            },
+            "revote": {
+              "type": "boolean"
+            },
+            "shuffle": {
+              "type": "boolean"
+            },
+            "hideResults": {
+              "type": "boolean"
+            },
+            "closeAfterSec": {
+              "type": "number"
+            },
+            "closeAt": {
+              "type": "number"
+            },
+            "saveTo": {
+              "$ref": "#/$defs/Ref"
+            },
+            "addOptions": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "question",
+            "options",
+            "anonymous",
+            "multiple"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "quiz"
+            },
+            "question": {
+              "$ref": "#/$defs/RichText"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/LangText"
+              }
+            },
+            "anonymous": {
+              "type": "boolean"
+            },
+            "multiple": {
+              "type": "boolean"
+            },
+            "revote": {
+              "type": "boolean"
+            },
+            "shuffle": {
+              "type": "boolean"
+            },
+            "hideResults": {
+              "type": "boolean"
+            },
+            "closeAfterSec": {
+              "type": "number"
+            },
+            "closeAt": {
+              "type": "number"
+            },
+            "saveTo": {
+              "$ref": "#/$defs/Ref"
+            },
+            "correct": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "explanation": {
+              "$ref": "#/$defs/RichText"
+            }
+          },
+          "required": [
+            "type",
+            "question",
+            "options",
+            "anonymous",
+            "multiple",
+            "correct"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dice"
+            },
+            "emoji": {
+              "type": "string",
+              "enum": [
+                "🎲",
+                "🎯",
+                "🏀",
+                "⚽",
+                "🎳",
+                "🎰"
+              ]
+            },
+            "saveTo": {
+              "$ref": "#/$defs/Ref"
+            }
+          },
+          "required": [
+            "type",
+            "emoji"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "paidMedia"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "media": {
+                    "$ref": "#/$defs/Ref"
+                  }
+                },
+                "required": [
+                  "media"
+                ]
+              }
+            },
+            "stars": {
+              "type": "number"
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            },
+            "captionAbove": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "items",
+            "stars"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "rich"
+            },
+            "blocks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RichBlock"
+              }
+            },
+            "rtl": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "blocks"
+          ]
+        }
+      ],
+      "description": "What a message sends."
+    },
+    "RichText": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/LangRichText"
+      },
+      "description": "A text of a message, caption or text part per language."
+    },
+    "LangRichText": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Entity"
+          }
+        },
+        "html": {
+          "type": "string"
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "var": {
+                "$ref": "#/$defs/Ref"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "length": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "var",
+              "offset",
+              "length"
+            ]
+          }
+        },
+        "rich": {
+          "$ref": "#/$defs/RichDoc"
+        }
+      },
+      "required": [
+        "text",
+        "entities",
+        "html",
+        "variables"
+      ],
+      "description": "One language of a text: plain text with {idName} placeholders, entities, Telegram HTML, the variable places and the rich document."
+    },
+    "Entity": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "spoiler",
+            "code",
+            "pre",
+            "blockquote",
+            "expandable_blockquote",
+            "text_link",
+            "custom_emoji",
+            "date_time"
+          ]
+        },
+        "offset": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "url": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "custom_emoji_id": {
+          "type": "string"
+        },
+        "unix_time": {
+          "type": "number"
+        },
+        "date_time_format": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "offset",
+        "length"
+      ],
+      "description": "A MessageEntity; offsets and lengths count UTF-16 code units."
+    },
+    "RichDoc": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "doc"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "paragraph"
+                  },
+                  "content": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "text"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "bold",
+                                          "italic",
+                                          "underline",
+                                          "strike",
+                                          "spoiler",
+                                          "code"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "link"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "href"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "dateTime"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "unix": {
+                                            "type": "number"
+                                          },
+                                          "format": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "unix",
+                                          "format"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "text"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "hardBreak"
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "bold",
+                                          "italic",
+                                          "underline",
+                                          "strike",
+                                          "spoiler",
+                                          "code"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "link"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "href"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "dateTime"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "unix": {
+                                            "type": "number"
+                                          },
+                                          "format": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "unix",
+                                          "format"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "variable"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "properties": {
+                                "var": {
+                                  "type": "string",
+                                  "pattern": "^[\\w-]{1,64}$"
+                                }
+                              },
+                              "required": [
+                                "var"
+                              ]
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "bold",
+                                          "italic",
+                                          "underline",
+                                          "strike",
+                                          "spoiler",
+                                          "code"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "link"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "href"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "dateTime"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "unix": {
+                                            "type": "number"
+                                          },
+                                          "format": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "unix",
+                                          "format"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "attrs"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "customEmoji"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "fallback": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "fallback"
+                              ]
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "bold",
+                                          "italic",
+                                          "underline",
+                                          "strike",
+                                          "spoiler",
+                                          "code"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "link"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "href"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "dateTime"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "unix": {
+                                            "type": "number"
+                                          },
+                                          "format": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "unix",
+                                          "format"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "attrs"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "part"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "properties": {
+                                "part": {
+                                  "type": "string",
+                                  "pattern": "^[\\w-]{1,64}$"
+                                }
+                              },
+                              "required": [
+                                "part"
+                              ]
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "bold",
+                                          "italic",
+                                          "underline",
+                                          "strike",
+                                          "spoiler",
+                                          "code"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "link"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "href"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "const": "dateTime"
+                                      },
+                                      "attrs": {
+                                        "type": "object",
+                                        "properties": {
+                                          "unix": {
+                                            "type": "number"
+                                          },
+                                          "format": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "unix",
+                                          "format"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "attrs"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "attrs"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "codeBlock"
+                  },
+                  "attrs": {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    }
+                  },
+                  "content": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "text"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "blockquote"
+                  },
+                  "attrs": {
+                    "type": "object",
+                    "properties": {
+                      "expandable": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "content": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "paragraph"
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "text"
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  },
+                                  "marks": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "spoiler",
+                                                "code"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "link"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "href": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "href"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "dateTime"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "unix": {
+                                                  "type": "number"
+                                                },
+                                                "format": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "unix",
+                                                "format"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "hardBreak"
+                                  },
+                                  "marks": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "spoiler",
+                                                "code"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "link"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "href": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "href"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "dateTime"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "unix": {
+                                                  "type": "number"
+                                                },
+                                                "format": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "unix",
+                                                "format"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "variable"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "properties": {
+                                      "var": {
+                                        "type": "string",
+                                        "pattern": "^[\\w-]{1,64}$"
+                                      }
+                                    },
+                                    "required": [
+                                      "var"
+                                    ]
+                                  },
+                                  "marks": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "spoiler",
+                                                "code"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "link"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "href": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "href"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "dateTime"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "unix": {
+                                                  "type": "number"
+                                                },
+                                                "format": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "unix",
+                                                "format"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "attrs"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "customEmoji"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "fallback": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "fallback"
+                                    ]
+                                  },
+                                  "marks": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "spoiler",
+                                                "code"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "link"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "href": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "href"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "dateTime"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "unix": {
+                                                  "type": "number"
+                                                },
+                                                "format": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "unix",
+                                                "format"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "attrs"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "part"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "properties": {
+                                      "part": {
+                                        "type": "string",
+                                        "pattern": "^[\\w-]{1,64}$"
+                                      }
+                                    },
+                                    "required": [
+                                      "part"
+                                    ]
+                                  },
+                                  "marks": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "spoiler",
+                                                "code"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "link"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "href": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "href"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "const": "dateTime"
+                                            },
+                                            "attrs": {
+                                              "type": "object",
+                                              "properties": {
+                                                "unix": {
+                                                  "type": "number"
+                                                },
+                                                "format": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "unix",
+                                                "format"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "attrs"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "attrs"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "content"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "type",
+        "content"
+      ],
+      "description": "A rich text document (TipTap JSON); variable and part nodes hold ID names."
+    },
+    "RichBlock": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "paragraph",
+                "footer"
+              ]
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "heading"
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            },
+            "size": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "text",
+            "size"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "code"
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            },
+            "language": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "quote"
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            },
+            "credit": {
+              "$ref": "#/$defs/RichText"
+            },
+            "expandable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "list"
+            },
+            "ordered": {
+              "type": "boolean"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "$ref": "#/$defs/RichText"
+                  },
+                  "checked": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          },
+          "required": [
+            "type",
+            "ordered",
+            "items"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "table"
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "cells": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "$ref": "#/$defs/RichText"
+                        },
+                        "header": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "text"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "cells"
+                ]
+              }
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            },
+            "bordered": {
+              "type": "boolean"
+            },
+            "striped": {
+              "type": "boolean"
+            },
+            "compact": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "rows"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "details"
+            },
+            "summary": {
+              "$ref": "#/$defs/RichText"
+            },
+            "text": {
+              "$ref": "#/$defs/RichText"
+            },
+            "open": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "summary",
+            "text"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "divider"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "media"
+            },
+            "media": {
+              "$ref": "#/$defs/Ref"
+            },
+            "caption": {
+              "$ref": "#/$defs/RichText"
+            },
+            "spoiler": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "media"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "buttons"
+            },
+            "buttons": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Button"
+              }
+            },
+            "align": {
+              "type": "string",
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "buttons"
+          ]
+        }
+      ],
+      "description": "A block of a rich message (InputRichBlock): paragraph, footer, heading (size 1 to 6), code (pre), quote, list, table, details, divider, media or a row of buttons."
+    },
+    "Button": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/IdName"
+        },
+        "label": {
+          "$ref": "#/$defs/LangText"
+        },
+        "look": {
+          "type": "string",
+          "enum": [
+            "default",
+            "primary",
+            "success",
+            "danger"
+          ]
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "customEmojiId": {
+                  "type": "string"
+                },
+                "fallback": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "customEmojiId",
+                "fallback"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "does": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "goTo"
+                },
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "stay"
+                    },
+                    {
+                      "$ref": "#/$defs/Target"
+                    }
+                  ]
+                },
+                "show": {
+                  "type": "string",
+                  "enum": [
+                    "edit",
+                    "new",
+                    "replace"
+                  ]
+                },
+                "popup": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "toast",
+                            "alert"
+                          ]
+                        },
+                        "text": {
+                          "$ref": "#/$defs/LangText"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "remember": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/RememberAction"
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "target",
+                "show",
+                "popup"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "url"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "copyText"
+                },
+                "text": {
+                  "$ref": "#/$defs/LangText"
+                }
+              },
+              "required": [
+                "type",
+                "text"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "loginUrl"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "requestWriteAccess": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "url",
+                "requestWriteAccess"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "pay"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "text"
+                },
+                "goTo": {
+                  "$ref": "#/$defs/Target"
+                },
+                "remember": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/RememberAction"
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "goTo"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "sharePhone",
+                    "shareLocation"
+                  ]
+                },
+                "goTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "saveTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "goTo",
+                "saveTo"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "pickUsers"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "bots": {
+                  "type": "boolean"
+                },
+                "premium": {
+                  "type": "boolean"
+                },
+                "askName": {
+                  "type": "boolean"
+                },
+                "askUsername": {
+                  "type": "boolean"
+                },
+                "askPhoto": {
+                  "type": "boolean"
+                },
+                "goTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "saveTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "max",
+                "askName",
+                "askUsername",
+                "askPhoto",
+                "goTo",
+                "saveTo"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "pickChat"
+                },
+                "channel": {
+                  "type": "boolean"
+                },
+                "forum": {
+                  "type": "boolean"
+                },
+                "hasUsername": {
+                  "type": "boolean"
+                },
+                "userIsOwner": {
+                  "type": "boolean"
+                },
+                "botIsMember": {
+                  "type": "boolean"
+                },
+                "askTitle": {
+                  "type": "boolean"
+                },
+                "askUsername": {
+                  "type": "boolean"
+                },
+                "askPhoto": {
+                  "type": "boolean"
+                },
+                "goTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "saveTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "channel",
+                "askTitle",
+                "askUsername",
+                "askPhoto",
+                "goTo",
+                "saveTo"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "createPoll"
+                },
+                "pollType": {
+                  "type": "string",
+                  "enum": [
+                    "any",
+                    "regular",
+                    "quiz"
+                  ]
+                },
+                "goTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "saveTo": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "pollType",
+                "goTo",
+                "saveTo"
+              ]
+            }
+          ]
+        },
+        "telegram": {
+          "type": "object",
+          "properties": {
+            "button": {
+              "type": "string"
+            },
+            "suggestedCallbackData": {
+              "type": "string"
+            },
+            "style": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "success",
+                "danger"
+              ]
+            },
+            "icon_custom_emoji_id": {
+              "type": "string"
+            },
+            "onClick": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "update": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "button"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "look",
+        "icon",
+        "does"
+      ],
+      "description": "A button with what a press does and its Bot API mapping."
+    },
+    "RememberAction": {
+      "type": "object",
+      "properties": {
+        "var": {
+          "$ref": "#/$defs/Ref"
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "set",
+            "clear",
+            "add",
+            "subtract",
+            "append"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "var": {
+                  "$ref": "#/$defs/Ref"
+                }
+              },
+              "required": [
+                "var"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "var",
+        "op"
+      ],
+      "description": "Set, clear or change a variable."
+    },
+    "Keyboard": {
+      "anyOf": [
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "inline"
+                },
+                "rows": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/Button"
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "part": {
+                            "$ref": "#/$defs/Ref"
+                          },
+                          "buttons": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/$defs/Button"
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "part",
+                          "buttons"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "openReplyField": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "rows"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "reply"
+                },
+                "rows": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/Button"
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "part": {
+                            "$ref": "#/$defs/Ref"
+                          },
+                          "buttons": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/$defs/Button"
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "part",
+                          "buttons"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "oneTime": {
+                  "type": "boolean"
+                },
+                "persistent": {
+                  "type": "boolean"
+                },
+                "resize": {
+                  "type": "boolean"
+                },
+                "placeholder": {
+                  "$ref": "#/$defs/LangText"
+                },
+                "openReplyField": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "rows",
+                "oneTime",
+                "persistent",
+                "resize"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "removeReply"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "forceReply"
+                },
+                "placeholder": {
+                  "$ref": "#/$defs/LangText"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The keyboard of a message, or null for none."
+    },
+    "Options": {
+      "type": "object",
+      "properties": {
+        "silent": {
+          "type": "boolean"
+        },
+        "protect": {
+          "type": "boolean"
+        },
+        "linkPreview": {
+          "type": "object",
+          "properties": {
+            "off": {
+              "type": "boolean"
+            },
+            "url": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "small",
+                "large"
+              ]
+            },
+            "above": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "off",
+            "size",
+            "above"
+          ]
+        },
+        "effect": {
+          "type": "string"
+        },
+        "chatAction": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "typing",
+                "upload_photo",
+                "record_video",
+                "upload_video",
+                "record_voice",
+                "upload_voice",
+                "upload_document",
+                "choose_sticker",
+                "find_location",
+                "record_video_note",
+                "upload_video_note"
+              ]
+            },
+            "seconds": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "action",
+            "seconds"
+          ]
+        },
+        "delaySec": {
+          "type": "number"
+        },
+        "draft": {
+          "type": "boolean"
+        },
+        "draftStop": {
+          "type": "boolean"
+        },
+        "draftKeep": {
+          "type": "boolean"
+        }
+      },
+      "description": "The options of a message: silent is disable_notification, protect is protect_content, then the link preview, the message effect ID, a chat action sent before it, a delay in seconds, and a draft written out first (draft) with its stop button (draftStop is can_stop, draftKeep keep_on_stop)."
+    },
+    "Invoice": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/LangText"
+        },
+        "description": {
+          "$ref": "#/$defs/LangText"
+        },
+        "photo": {
+          "$ref": "#/$defs/Ref"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "prices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/LangText"
+              },
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "label",
+              "amount"
+            ]
+          }
+        },
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "periodDays": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "periodDays"
+          ]
+        },
+        "physical": {
+          "type": "object",
+          "properties": {
+            "needName": {
+              "type": "boolean"
+            },
+            "needPhone": {
+              "type": "boolean"
+            },
+            "needEmail": {
+              "type": "boolean"
+            },
+            "needAddress": {
+              "type": "boolean"
+            },
+            "flexibleShipping": {
+              "type": "boolean"
+            },
+            "shippingOptions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "$ref": "#/$defs/LangText"
+                  },
+                  "amount": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "amount"
+                ]
+              }
+            }
+          },
+          "required": [
+            "needName",
+            "needPhone",
+            "needEmail",
+            "needAddress",
+            "flexibleShipping",
+            "shippingOptions"
+          ]
+        },
+        "payload": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "currency",
+        "prices",
+        "payload"
+      ],
+      "description": "What an invoice sells, as sendInvoice takes it: amounts in the smallest unit of the currency."
+    }
+  }
+}

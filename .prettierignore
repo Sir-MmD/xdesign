@@ -1,0 +1,11 @@
+# Generated files (never edited by hand; make gen writes them)
+apps/web/src/routeTree.gen.ts
+apps/server/migrations/
+packages/spec/schema/
+pnpm-lock.yaml
+
+# The plan, notes and other prose keep their own line breaks.
+*.md
+
+# On main, the agents' worktrees live in .claude/worktrees/.
+.claude/

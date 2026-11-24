@@ -1,0 +1,19 @@
+[Unit]
+Description=Carry out an update or a rollback asked for in xDesign's Maintenance
+
+# Started by xdesign-maintenance.path. It runs as root, because an update or a rollback
+# replaces the program and restarts xDesign; it trusts nothing in the maintenance folder,
+# which belongs to the xdesign user, and takes only the kinds of requests it knows
+# (docs/plan/07-server-install-update.md section 6). It writes its progress to
+# /var/lib/xdesign/maintenance/progress.json and the outcome to result.json, which the
+# website shows.
+[Service]
+Type=oneshot
+ExecStart=/opt/xdesign/current/xdesign admin maintenance --request /var/lib/xdesign/maintenance/request.json
+# An update backs up the site first, which takes hours at most for a large one.
+TimeoutStartSec=12h
+UMask=0077
+SyslogIdentifier=xdesign-maintenance
+PrivateTmp=yes
+ProtectHome=yes
+LimitCORE=0

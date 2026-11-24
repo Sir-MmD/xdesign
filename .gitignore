@@ -1,0 +1,13 @@
+.dev/
+# The spec.json make spec-check writes for the owner to read.
+packages/spec/fixtures/out/
+node_modules/
+dist/
+/.tools
+*.tsbuildinfo
+.env
+.env.*
+helper/payload/
+helper/internal/payload/payload.tar.zst
+claude_optimized*.md
+.claude/worktrees/

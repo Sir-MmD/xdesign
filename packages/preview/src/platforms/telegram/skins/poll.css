@@ -1,0 +1,217 @@
+/* Polls, quizzes and paid media (MSG-03): drawn from PollTokens and PaidTokens (tokens.ts,
+   kindProperties), read from the Telegram apps and not measured yet (calibrate: O-02). The
+   marks and bars take the bubble's link color, the type line and the footer its info row color. */
+
+.tg-poll {
+  padding: var(--tg-pad-top) var(--tg-pad-right) 0 var(--tg-pad-left);
+}
+
+.tg-poll-question {
+  font-size: var(--tg-poll-question-size);
+  font-weight: var(--tg-poll-question-weight);
+  overflow-wrap: anywhere;
+  text-align: start;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-poll-type {
+  margin: 2px 0 var(--tg-poll-type-gap);
+  color: var(--tg-meta);
+  font-size: var(--tg-poll-type-size);
+}
+
+.tg-poll-option {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  min-height: var(--tg-poll-option-height);
+  margin-bottom: var(--tg-poll-option-gap);
+  font-size: var(--tg-poll-option-size);
+}
+
+/* The round mark before an unvoted option; a quiz's right option (the editor's phone) and a
+   picked option (several answers, before "Vote") show it filled with a check. */
+.tg-poll-mark {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: var(--tg-poll-mark);
+  height: var(--tg-poll-mark);
+  margin: 1px var(--tg-poll-mark-gap) 0 0;
+  border: 2px solid color-mix(in srgb, var(--tg-meta) 70%, transparent);
+  border-radius: 50%;
+}
+
+.tg-poll[data-multiple='true'] .tg-poll-mark {
+  border-radius: 30%;
+}
+
+.tg-poll-option[data-state='picked'] .tg-poll-mark,
+.tg-poll-option[data-state='right'] .tg-poll-mark {
+  border-color: transparent;
+  background: var(--tg-link);
+}
+
+.tg-poll-option[data-state='right'] .tg-poll-mark {
+  background: var(--tg-poll-right);
+}
+
+.tg-poll-option[data-state='picked'] .tg-poll-mark::after,
+.tg-poll-option[data-state='right'] .tg-poll-mark::after,
+.tg-poll-tick::after {
+  position: absolute;
+  top: 20%;
+  left: 36%;
+  box-sizing: border-box;
+  width: 28%;
+  height: 46%;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  content: '';
+}
+
+/* The option's text with a line under it until the vote. */
+.tg-poll-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1px 0 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--tg-meta) 25%, transparent);
+  overflow-wrap: anywhere;
+  text-align: start;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-poll.voted .tg-poll-text {
+  padding-bottom: calc(var(--tg-poll-bar) + 10px);
+  border-bottom: 0;
+}
+
+/* Voted: the share of the votes where the mark was, the bar under the text, the tick of the
+   chosen option (a quiz's right one, or its chosen wrong one with a cross) at the bar's start. */
+.tg-poll-percent {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: calc(var(--tg-poll-mark) + var(--tg-poll-mark-gap));
+  padding: 1px var(--tg-poll-mark-gap) 0 0;
+  font-size: calc(var(--tg-poll-option-size) - 2px);
+  font-weight: var(--tg-bold);
+  text-align: end;
+}
+
+.tg-poll-result {
+  position: absolute;
+  right: 0;
+  bottom: 6px;
+  left: calc(var(--tg-poll-mark) + var(--tg-poll-mark-gap));
+  display: flex;
+  align-items: center;
+  height: var(--tg-poll-bar);
+}
+
+.tg-poll-bar {
+  min-width: var(--tg-poll-bar);
+  height: var(--tg-poll-bar);
+  border-radius: var(--tg-poll-bar);
+  background: var(--tg-link);
+}
+
+.tg-poll-option[data-state='right'] .tg-poll-bar {
+  background: var(--tg-poll-right);
+}
+
+.tg-poll-option[data-state='wrong'] .tg-poll-bar {
+  background: var(--tg-poll-wrong);
+}
+
+.tg-poll-tick {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--tg-poll-mark-gap) - 14px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--tg-link);
+  transform: translateY(-50%);
+}
+
+.tg-poll-option[data-state='right'] .tg-poll-tick {
+  background: var(--tg-poll-right);
+}
+
+.tg-poll-option[data-state='wrong'] .tg-poll-tick {
+  background: var(--tg-poll-wrong);
+}
+
+.tg-poll-option[data-state='wrong'] .tg-poll-tick::before,
+.tg-poll-option[data-state='wrong'] .tg-poll-tick::after {
+  position: absolute;
+  top: 25%;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 50%;
+  border: 0;
+  background: #ffffff;
+  transform: rotate(45deg);
+  content: '';
+}
+
+.tg-poll-option[data-state='wrong'] .tg-poll-tick::after {
+  transform: rotate(-45deg);
+}
+
+/* The footer: the count, or "Vote" and "View Results" in the link color; the info row sits at
+   its end. */
+.tg-poll-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tg-poll-footer-height);
+  color: var(--tg-meta);
+  font-size: var(--tg-poll-footer-size);
+}
+
+.tg-poll-action {
+  color: var(--tg-link);
+  font-weight: var(--tg-bold);
+}
+
+.tg-poll-action.off {
+  opacity: 0.5;
+}
+
+/* Paid media not bought yet: its pictures blurred, the price button over them in the look's pill
+   colors over media. */
+.tg-bubble[data-paid='locked'] :is(.tg-media-image, .tg-media-fill, .tg-album-item img) {
+  filter: blur(var(--tg-paid-blur));
+}
+
+.tg-paid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tg-paid-button {
+  display: inline-flex;
+  align-items: center;
+  height: var(--tg-paid-height);
+  padding: 0 var(--tg-paid-pad);
+  border-radius: var(--tg-paid-radius);
+  background: var(--tg-media-meta-bg);
+  color: var(--tg-media-meta-text);
+  font-size: var(--tg-paid-size);
+  font-weight: var(--tg-paid-weight);
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+
+.tg-paid-button img.tg-emoji {
+  width: 1.15em;
+  height: 1.15em;
+}

@@ -1,0 +1,581 @@
+/* The private chat (PRV-02, docs/plan/04-editor.md sections 4.4, 7 and 8): the parts around a
+   bot's messages that Chat.tsx draws, from the look's chat tokens (SkinTokens.chat and the chat
+   colors, written as custom properties by skinProperties) like the rest of preview.css, which
+   imports this file; what a look draws its own way is in its stylesheet, scoped as there.
+   xWriter has no private chat, so every value waits for the owner's screenshots
+   (calibrate: O-02). */
+
+/* The screen: the top bar, the list that scrolls and starts at its end, the input field. */
+.tg-chat.screen {
+  display: flex;
+  flex-direction: column;
+  height: var(--tg-chat-height);
+}
+
+.tg-chat.screen > .tg-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: calc(var(--tg-list-bottom) + var(--tg-composer-room));
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.tg-chat.screen > .tg-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* The rows sit at the list's bottom, above the input field, as in the apps. */
+.tg-rows {
+  margin-top: auto;
+}
+
+.tg-rows > .tg-row + .tg-row {
+  margin-top: var(--tg-chat-gap);
+}
+
+/* The top bar's status while the bot is doing something, with the look's dots. */
+.tg-header-sub.typing {
+  color: var(--tg-typing);
+}
+
+.tg-typing-dots {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0 3px;
+  vertical-align: middle;
+}
+
+.tg-typing-dots > span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: tg-typing 1.2s ease-in-out infinite;
+}
+
+.tg-typing-dots > span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.tg-typing-dots > span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes tg-typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+
+  30% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-typing-dots > span {
+    animation: none;
+  }
+}
+
+/* The user's message on the right in the outgoing colors: the incoming bubble mirrored, so
+   each look's tail and its own rules for it draw on the right, and its body turned back. */
+.tg-row.out {
+  --tg-bubble: var(--tg-out-bubble);
+  --tg-link: var(--tg-out-link);
+  --tg-meta: var(--tg-out-meta);
+  --tg-outline: var(--tg-out-outline);
+  --tg-shadow: var(--tg-out-shadow);
+  --tg-tail-shadow: var(--tg-out-shadow);
+  justify-content: flex-end;
+  padding-right: var(--tg-out-margin-right);
+  padding-left: var(--tg-out-margin-left);
+  color: var(--tg-out-text);
+}
+
+.tg-row.out > .tg-bubble-wrap,
+.tg-row.out > .tg-bubble-wrap > .tg-bubble > .tg-body {
+  transform: scaleX(-1);
+}
+
+.tg-checks {
+  flex: 0 0 auto;
+  width: var(--tg-out-check-width);
+  height: var(--tg-out-check-height);
+  color: var(--tg-out-check);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
+}
+
+/* A service line (a date), centred over the wallpaper. */
+.tg-service {
+  display: flex;
+  justify-content: center;
+  margin: var(--tg-service-margin) 0;
+  padding: 0 8px;
+}
+
+.tg-service-text {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  height: var(--tg-service-height);
+  padding: 0 var(--tg-service-pad);
+  overflow: hidden;
+  border-radius: var(--tg-service-radius);
+  background: var(--tg-service-bg);
+  color: var(--tg-service-text);
+  font-size: var(--tg-service-size);
+  font-weight: var(--tg-service-weight);
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The input field: a bar across the bottom, or a pill the chat runs under (its room is in
+   the list's padding), with the bottom keyboard over the chat or under the field. */
+.tg-composer-area {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+}
+
+.tg-composer-area.floating {
+  margin-top: calc(-1 * var(--tg-composer-room));
+}
+
+.tg-composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.tg-composer-area.floating > .tg-composer-row,
+.tg-composer-area.floating > .tg-start {
+  padding: 0 var(--tg-composer-side) var(--tg-composer-bottom);
+}
+
+.tg-composer {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--tg-composer-gap);
+  min-width: 0;
+  height: var(--tg-composer-height);
+  padding: 0 var(--tg-composer-pad);
+  border-top: 1px solid var(--tg-composer-border);
+  background: var(--tg-composer);
+  color: var(--tg-composer-icon-color);
+  font-size: var(--tg-composer-size);
+  line-height: 1.25;
+}
+
+.tg-composer.floating {
+  border-top: 0;
+  border-radius: var(--tg-composer-radius);
+}
+
+.tg-composer-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  color: var(--tg-composer-placeholder);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-composer-draft {
+  color: var(--tg-composer-text);
+}
+
+/* Try it (TRY-02): the field takes typed text, and what acts shows the hand. */
+.tg-composer-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--tg-composer-text);
+  font: inherit;
+  outline: none;
+}
+
+.tg-composer-input::placeholder {
+  color: var(--tg-composer-placeholder);
+  opacity: 1;
+}
+
+[data-press] {
+  cursor: pointer;
+}
+
+[data-press]:focus-visible {
+  outline: 2px solid var(--tg-link, currentColor);
+  outline-offset: 1px;
+}
+
+.tg-composer-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: calc(var(--tg-composer-icon) + 12px);
+  height: calc(var(--tg-composer-icon) + 12px);
+}
+
+.tg-composer-button.send,
+.tg-send-button.send {
+  color: var(--tg-send);
+}
+
+.tg-composer-icon {
+  width: var(--tg-composer-icon);
+  height: var(--tg-composer-icon);
+  fill: currentColor;
+}
+
+.tg-composer-icon.stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+/* The round send button beside the pill (Web A, Web K). */
+.tg-send-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--tg-send-size);
+  height: var(--tg-send-size);
+  border-radius: 50%;
+  background: var(--tg-composer);
+  color: var(--tg-composer-icon-color);
+}
+
+/* The menu button: "Menu" with its lines, for the design's commands menu button. */
+.tg-menu-button {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  height: var(--tg-menu-height);
+  margin: 0 4px;
+  padding: 0 var(--tg-menu-pad);
+  border-radius: var(--tg-menu-radius);
+  background: var(--tg-menu-bg);
+  color: var(--tg-menu-text);
+  font-size: var(--tg-menu-size);
+  font-weight: var(--tg-menu-weight);
+  white-space: nowrap;
+}
+
+.tg-menu-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+/* The bottom keyboard: the system keyboard's height with its rows stretched, or, resized, as
+   tall as its rows; over the chat it is a panel above the input field. */
+.tg-rk-place {
+  flex: 0 0 auto;
+}
+
+.tg-rk-place.over {
+  position: absolute;
+  right: var(--tg-composer-side);
+  bottom: 100%;
+  left: var(--tg-composer-side);
+  margin-bottom: 8px;
+}
+
+.tg-reply-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tg-rk-gap);
+  height: var(--tg-rk-height);
+  padding: var(--tg-rk-pad);
+  overflow-y: auto;
+  background: var(--tg-rk-panel);
+  scrollbar-width: none;
+}
+
+.tg-reply-keyboard.resized {
+  height: auto;
+  max-height: var(--tg-rk-height);
+}
+
+.tg-rk-place.over > .tg-reply-keyboard {
+  border-radius: var(--tg-composer-radius);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tg-rk-row {
+  display: grid;
+  flex: 1 0 var(--tg-rk-button);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--tg-rk-gap);
+}
+
+.tg-reply-keyboard.resized > .tg-rk-row {
+  flex: 0 0 var(--tg-rk-button);
+}
+
+.tg-rk-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 8px;
+  border-radius: var(--tg-rk-radius);
+  background: var(--tg-rk-bg);
+  box-shadow: var(--tg-rk-shadow);
+  color: var(--tg-rk-text);
+  font-size: var(--tg-rk-size);
+  font-weight: var(--tg-rk-weight);
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tg-rk-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A colored button (Bot API 9.4), in the inline buttons' colors. */
+.tg-rk-button.success,
+.tg-rk-button.primary,
+.tg-rk-button.danger {
+  color: #ffffff;
+}
+
+.tg-rk-button.success {
+  background: var(--tg-kb-success);
+}
+
+.tg-rk-button.primary {
+  background: var(--tg-kb-primary);
+}
+
+.tg-rk-button.danger {
+  background: var(--tg-kb-danger);
+}
+
+/* The commands menu above the input field. */
+.tg-commands {
+  position: absolute;
+  right: var(--tg-composer-side);
+  bottom: 100%;
+  left: var(--tg-composer-side);
+  max-height: var(--tg-cmd-max);
+  margin-bottom: 8px;
+  overflow-y: auto;
+  border-radius: var(--tg-cmd-radius);
+  background: var(--tg-cmd-bg);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+  scrollbar-width: none;
+}
+
+.tg-composer-area:not(.floating) > .tg-commands {
+  margin-bottom: 0;
+}
+
+.tg-command {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--tg-cmd-row);
+  padding: 0 var(--tg-cmd-pad);
+}
+
+.tg-command-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--tg-cmd-avatar);
+  height: var(--tg-cmd-avatar);
+  overflow: hidden;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: calc(var(--tg-cmd-avatar) * 0.42);
+  font-weight: 600;
+}
+
+.tg-command-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tg-command-text {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tg-command-main {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tg-cmd-text);
+  font-size: var(--tg-cmd-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-command-sub {
+  flex: 0 0 auto;
+  color: var(--tg-cmd-subtext);
+  font-size: var(--tg-cmd-sub-size);
+  white-space: nowrap;
+}
+
+/* A callback answer's toast: under the top bar, in the middle, or above the input field. */
+.tg-toast {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  max-width: min(var(--tg-toast-max), calc(var(--tg-frame-width) - 32px));
+  padding: var(--tg-toast-pad);
+  overflow-wrap: anywhere;
+  border-radius: var(--tg-toast-radius);
+  background: var(--tg-toast-bg);
+  color: var(--tg-toast-text);
+  font-size: var(--tg-toast-size);
+  line-height: 1.3;
+  white-space: pre-wrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tg-toast.top {
+  top: calc(var(--tg-list-top) + var(--tg-toast-offset));
+}
+
+.tg-toast.middle {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tg-toast.bottom {
+  bottom: calc(100% + var(--tg-toast-offset));
+  width: max-content;
+}
+
+/* A callback answer's alert over the shaded chat. */
+.tg-alert-scrim {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--tg-scrim);
+}
+
+.tg-alert {
+  width: min(var(--tg-alert-width), calc(100% - 48px));
+  padding: var(--tg-alert-pad);
+  border-radius: var(--tg-alert-radius);
+  background: var(--tg-alert-bg);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  color: var(--tg-alert-text);
+  font-size: var(--tg-alert-size);
+  line-height: 1.35;
+}
+
+.tg-alert-title {
+  margin-bottom: 8px;
+  font-size: var(--tg-alert-title-size);
+  font-weight: var(--tg-bold);
+}
+
+.tg-alert-text {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.tg-alert-buttons {
+  display: flex;
+  justify-content: var(--tg-alert-button-align);
+  margin-top: 12px;
+}
+
+.tg-alert-button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--tg-alert-button);
+  font: inherit;
+  font-size: var(--tg-alert-button-size);
+  font-weight: var(--tg-bold);
+  cursor: pointer;
+}
+
+/* The empty chat: the card with "What can this bot do?" and the description in the middle,
+   and the Start button in the input field's place. */
+.tg-chat.screen > .tg-list > .tg-empty {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.tg-empty-card {
+  width: min(var(--tg-empty-width), 100%);
+  padding: var(--tg-empty-pad);
+  overflow-wrap: anywhere;
+  border-radius: var(--tg-empty-radius);
+  background: var(--tg-empty-bg);
+  color: var(--tg-empty-text);
+  font-size: var(--tg-empty-size);
+  white-space: pre-wrap;
+}
+
+.tg-empty-title {
+  margin-bottom: var(--tg-empty-gap);
+  font-size: var(--tg-empty-title-size);
+  font-weight: var(--tg-bold);
+  text-align: center;
+}
+
+.tg-start-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tg-start-height);
+  border-top: 1px solid var(--tg-composer-border);
+  background: var(--tg-composer);
+  color: var(--tg-start-text);
+  font-size: var(--tg-start-size);
+  font-weight: var(--tg-start-weight);
+  text-transform: var(--tg-start-transform);
+  cursor: default;
+}
+
+.tg-start-button.filled {
+  background: var(--tg-start-bg);
+}
+
+.tg-composer-area.floating .tg-start-button,
+.tg-start-button.filled {
+  border-top: 0;
+  border-radius: var(--tg-start-radius);
+}

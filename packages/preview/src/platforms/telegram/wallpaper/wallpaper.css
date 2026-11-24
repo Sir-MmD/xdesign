@@ -1,0 +1,48 @@
+/* The chat background (29 section 8.4, TGP-02), drawn by Wallpaper.tsx behind the chat:
+   the base colour, the four-colour gradient (a small bitmap the browser scales smoothly, as
+   the apps do) and Telegram's pattern. Light themes lay the pattern's black shapes over the
+   gradient with soft-light; dark ones show the gradient only through the shapes, over the
+   base. Every position and size comes from custom properties Wallpaper.tsx computes. */
+
+.tg-wallpaper {
+  position: relative;
+  width: fit-content;
+}
+
+/* The chat is drawn over the wallpaper; its own background stays clear. */
+.tg-wallpaper .tg-chat {
+  background: transparent;
+}
+
+.tg-wallpaper-layers {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.tg-wallpaper-gradient,
+.tg-wallpaper-pattern {
+  position: absolute;
+  inset: 0;
+}
+
+.tg-wallpaper-gradient {
+  background: var(--tg-wp-gradient) var(--tg-wp-gradient-position) / var(--tg-wp-gradient-size) no-repeat;
+}
+
+/* Dark: the gradient seen only through the pattern's shapes. */
+.tg-wallpaper-gradient[data-blend='mask'],
+.tg-wallpaper-pattern {
+  opacity: var(--tg-wp-pattern-opacity);
+  -webkit-mask: var(--tg-art-pattern) var(--tg-wp-tile-position) / var(--tg-wp-tile-size) repeat;
+  mask: var(--tg-art-pattern) var(--tg-wp-tile-position) / var(--tg-wp-tile-size) repeat;
+}
+
+/* Light: the pattern's black shapes blended soft-light over the gradient. */
+.tg-wallpaper-pattern {
+  background: #000000;
+  mix-blend-mode: soft-light;
+}

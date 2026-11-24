@@ -1,0 +1,10 @@
+/* The part editor's small phone (PARTS-01, docs/plan/04 section 12): a row part's rows alone,
+   without the bubble they hang under in a message. Adopted only into that phone's shadow root. */
+
+.tg-bubble-wrap {
+  display: none;
+}
+
+.tg-keyboard {
+  margin-top: 0;
+}

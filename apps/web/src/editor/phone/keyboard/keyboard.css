@@ -1,0 +1,239 @@
+/* The keyboards edited on the phone (BTN-01, docs/plan/04 section 5.3): they live in the
+   preview's shadow root next to preview.css, so the buttons keep the look's own classes and
+   tokens (Q-28); this adds only what editing needs: the "+" at a row's end, "+ row", the dashed
+   outline of a row part with its name, the selected and dragged buttons, and the bar under the
+   bubble. */
+
+.xd-kb {
+  position: relative;
+}
+
+.xd-kb .tg-kb-button,
+.xd-kb .tg-rk-button {
+  cursor: pointer;
+  touch-action: none;
+}
+
+.xd-kb .tg-rk-button {
+  position: relative;
+}
+
+.xd-kb .tg-kb-button:focus-visible,
+.xd-kb .tg-rk-button:focus-visible,
+.xd-kb-selected {
+  outline: 2px solid var(--tg-link);
+  outline-offset: 1px;
+}
+
+.xd-kb-dragging {
+  opacity: 0.4;
+}
+
+/* The dragged copy fills the box dnd-kit gives it (the button's own size). */
+.xd-kb-overlay {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  cursor: grabbing;
+}
+
+/* The "+" at a row's end: beside the row under the bubble, inside its last button in the bottom
+   keyboard (which fills the screen's width); shown while the pointer is over the keyboard. */
+.xd-kb-add,
+.xd-kb-limit {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px dashed currentColor;
+  border-radius: 50%;
+  background: var(--tg-kb-bg);
+  color: var(--tg-kb-text);
+  font-family: var(--tg-font);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  translate: 0 -50%;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+
+.tg-kb-button > .xd-kb-add,
+.tg-kb-button > .xd-kb-limit {
+  left: calc(100% + 6px);
+}
+
+.tg-rk-button > .xd-kb-add,
+.tg-rk-button > .xd-kb-limit {
+  right: 4px;
+  background: var(--tg-rk-panel);
+  color: var(--tg-rk-text);
+}
+
+.xd-kb-limit {
+  border-style: solid;
+  font-size: 11px;
+  font-style: italic;
+  cursor: help;
+  opacity: 0.7;
+}
+
+.xd-kb:not(:hover, :focus-within) .xd-kb-add,
+.xd-kb:not(:hover, :focus-within) .xd-kb-limit,
+.xd-kb-moving .xd-kb-add,
+.xd-kb-moving .xd-kb-limit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* "+ row" under the last row; while a button is dragged it takes it into a new row. */
+.xd-kb-new-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 28px;
+  margin: var(--tg-kb-row-gap) calc(var(--tg-kb-overhang) * -1) 0;
+  padding: 0 8px;
+  border: 1px dashed color-mix(in srgb, var(--tg-kb-text) 55%, transparent);
+  border-radius: var(--tg-kb-radius);
+  background: color-mix(in srgb, var(--tg-kb-bg) 55%, transparent);
+  color: var(--tg-kb-text);
+  font-family: var(--tg-font);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.xd-kb-reply .xd-kb-new-row {
+  flex: 0 0 auto;
+  margin: 0;
+  border-color: color-mix(in srgb, var(--tg-rk-text) 45%, transparent);
+  border-radius: var(--tg-rk-radius);
+  background: transparent;
+  color: var(--tg-rk-text);
+}
+
+.xd-kb-new-row.over {
+  border-style: solid;
+}
+
+.xd-kb-new-row[aria-disabled='true'] {
+  cursor: help;
+  opacity: 0.6;
+}
+
+/* A row part: its rows in a dashed outline, its name on the outline (its menu). */
+.xd-part {
+  position: relative;
+  display: grid;
+  gap: var(--tg-kb-row-gap);
+  min-height: 24px;
+  border-radius: var(--tg-kb-radius);
+  outline: 1.5px dashed var(--tg-link);
+  outline-offset: 2px;
+}
+
+.xd-kb-reply .xd-part {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: var(--tg-rk-gap);
+  border-radius: var(--tg-rk-radius);
+}
+
+.xd-kb-reply .xd-part > .tg-rk-row {
+  flex: 1 0 var(--tg-rk-button);
+}
+
+.tg-reply-keyboard.resized .xd-part {
+  flex: 0 0 auto;
+}
+
+.tg-reply-keyboard.resized .xd-part > .tg-rk-row {
+  flex: 0 0 var(--tg-rk-button);
+}
+
+/* Only the keyboard's last row has the look's larger outer corners. */
+.xd-part:not(:last-child) > .tg-kb-row:last-child > .tg-kb-button:first-child {
+  border-bottom-left-radius: var(--tg-kb-radius);
+}
+
+.xd-part:not(:last-child) > .tg-kb-row:last-child > .tg-kb-button:last-child {
+  border-bottom-right-radius: var(--tg-kb-radius);
+}
+
+.xd-part-name {
+  position: absolute;
+  z-index: 1;
+  top: -9px;
+  left: 8px;
+  max-width: 70%;
+  padding: 0 6px;
+  overflow: hidden;
+  border: none;
+  border-radius: 8px;
+  background: var(--tg-link);
+  color: #ffffff;
+  font-family: var(--tg-font);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* A row part from the palette over the keyboard (PARTS-01): it drops here. */
+.xd-kb.xd-part-over {
+  border-radius: var(--tg-kb-radius);
+  outline: 2px dashed var(--tg-link);
+  outline-offset: 4px;
+}
+
+.xd-kb-reply.xd-part-over {
+  outline-offset: -2px;
+}
+
+/* The bottom keyboard's panel clips what sticks out of it: the name sits lower. */
+.xd-kb-reply .xd-part-name {
+  top: -5px;
+  line-height: 12px;
+}
+
+/* The bar under the bubble: it adds no width to the message, its chips overflow to the right. */
+.xd-kb-bar {
+  display: flex;
+  gap: 6px;
+  width: 0;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.xd-kb-chip {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border: 1px dashed color-mix(in srgb, var(--tg-kb-text) 60%, transparent);
+  border-radius: 14px;
+  background: var(--tg-kb-bg);
+  color: var(--tg-kb-text);
+  font-family: var(--tg-font);
+  font-size: 13px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.xd-kb-chip.on {
+  border-style: solid;
+}
+
+.xd-kb-chip:focus-visible,
+.xd-kb-new-row:focus-visible,
+.xd-kb-add:focus-visible,
+.xd-part-name:focus-visible {
+  outline: 2px solid var(--tg-link);
+  outline-offset: 1px;
+}

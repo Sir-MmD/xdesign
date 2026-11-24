@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    // The import alias of vite.config.ts (xWriter's `@/components/...`).
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/spec" },
+    { "path": "../../packages/api" },
+    { "path": "../../packages/preview" }
+  ]
+}

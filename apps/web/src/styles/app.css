@@ -1,0 +1,741 @@
+/*
+ * The site's design tokens, copied from xWriter's panel (web/src/styles/app.css) with only
+ * what the design system (components/ui) and the shell use: Tailwind 4, the shadcn/ui theme
+ * tokens (style base-nova) and the panel's tokens in Light and Dark, with xWriter's names so
+ * more of its components can be copied as they are. The section numbers in the comments are
+ * those of xWriter's plan. The brand is `--brand*`, because shadcn's `--accent` is the hover
+ * surface. The Telegram phone (packages/preview) has its own isolated styles and never uses
+ * these tokens.
+ */
+@import 'tailwindcss';
+/* Variants (data-open, data-closed, ...) and utilities used by the Base UI components. */
+@import './variants.css';
+/*
+ * Toast styles, loaded as part of this stylesheet because sonner's own runtime injection
+ * is blocked by the Content Security Policy (vite.config.ts disables it).
+ */
+@import 'sonner/dist/styles.css';
+/*
+ * The panel's fonts, bundled because the Content Security Policy allows fonts only from
+ * the site itself (font-src 'self'): Noto Sans with its italic, and Vazirmatn for Persian
+ * and Arabic. The browser downloads only the subsets a page uses (unicode-range).
+ */
+@import '@fontsource-variable/noto-sans';
+@import '@fontsource-variable/noto-sans/wght-italic.css';
+@import '@fontsource-variable/vazirmatn';
+
+/*
+ * Dark mode is the `dark` class on <html>, set by src/app/theme.ts before the first
+ * render, as the system's setting says.
+ */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * `motion-reduce:` and `motion-safe:` follow the panel's motion level, the data-motion
+ * attribute on <html> (below), instead of the device's setting alone: motion-reduce is
+ * Reduced or Off, motion-safe is On (docs/plan/32-owner-list-2026-10-26.md section 18.3).
+ */
+@custom-variant motion-reduce (&:where([data-motion='reduced'] *, [data-motion='off'] *));
+@custom-variant motion-safe (&:where([data-motion='on'] *));
+
+@theme {
+  --font-sans:
+    'Noto Sans Variable', 'Vazirmatn Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+  /* Code and IDs keep the system monospace stack. */
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /*
+   * The design tokens as Tailwind colors (17 section 4.2): `text-brand`, `bg-warn-weak`,
+   * `border-control`, `text-fg-3` ...
+   */
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-weak: var(--brand-weak);
+  --color-on-brand: var(--on-brand);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-press: var(--surface-press);
+  --color-border-strong: var(--border-strong);
+  --color-fg-2: var(--text-2);
+  --color-fg-3: var(--text-3);
+  --color-control: var(--control-border);
+  --color-focus: var(--focus);
+  --color-focus-halo: var(--focus-halo);
+  --color-ok: var(--ok);
+  --color-ok-weak: var(--ok-weak);
+  --color-info: var(--info);
+  --color-info-weak: var(--info-weak);
+  --color-warn: var(--warn);
+  --color-warn-weak: var(--warn-weak);
+  --color-error: var(--error);
+  --color-error-weak: var(--error-weak);
+  --color-off: var(--off);
+  --color-off-weak: var(--off-weak);
+  --color-on-status: var(--on-status);
+  --color-tg-blue: var(--tg-blue);
+  --color-on-tg-blue: var(--on-tg-blue);
+  --color-inverse: var(--inverse-bg);
+  --color-inverse-foreground: var(--inverse-text);
+  --color-scrim: var(--scrim);
+
+  /*
+   * Fixed radius steps instead of shadcn's scale computed from --radius: 6 px, 8 px
+   * (inputs), 10 px (buttons, rail items), 12 px (cells, menus, toasts) and 16 px (tiles,
+   * dialogs, sheets). Tailwind's 3xl and 4xl keep their defaults.
+   */
+  --radius-sm: var(--r-xs);
+  --radius-md: var(--r-sm);
+  --radius-lg: var(--r-md);
+  --radius-xl: var(--r-lg);
+  --radius-2xl: var(--r-xl);
+
+  /*
+   * The panel's text styles (35 section 12.2, APL-01): `text-body`, `text-footnote`, `text-headline` ... set the size
+   * and the line height of the scale below, which grows a step under 760 px; a `leading-*` class still overrides the
+   * line height. lib/utils.ts tells `cn` they are sizes, not colors. Tailwind's `text-xs` to `text-xl` keep their own
+   * values for the screens that still use them.
+   */
+  --text-caption-2: var(--fs-caption-2);
+  --text-caption-2--line-height: var(--lh-caption-2);
+  --text-caption: var(--fs-caption);
+  --text-caption--line-height: var(--lh-caption);
+  --text-footnote: var(--fs-footnote);
+  --text-footnote--line-height: var(--lh-footnote);
+  --text-subhead: var(--fs-subhead);
+  --text-subhead--line-height: var(--lh-subhead);
+  --text-callout: var(--fs-callout);
+  --text-callout--line-height: var(--lh-callout);
+  --text-body: var(--fs-body);
+  --text-body--line-height: var(--lh-body);
+  --text-headline: var(--fs-headline);
+  --text-headline--line-height: var(--lh-headline);
+  --text-headline--font-weight: var(--fw-semibold);
+  --text-title-3: var(--fs-title-3);
+  --text-title-3--line-height: var(--lh-title-3);
+  --text-title-2: var(--fs-title-2);
+  --text-title-2--line-height: var(--lh-title-2);
+  --text-title-2--letter-spacing: var(--tracking-title);
+  --text-title-1: var(--fs-title-1);
+  --text-title-1--line-height: var(--lh-title-1);
+  --text-title-1--letter-spacing: var(--tracking-title);
+  --text-large-title: var(--fs-large-title);
+  --text-large-title--line-height: var(--lh-large-title);
+  --text-large-title--letter-spacing: var(--tracking-title);
+
+  /* A plain `transition` (and `transition-colors` ...) without its own timing takes the quick spring. */
+  --default-transition-duration: var(--dur-fast);
+  --default-transition-timing-function: var(--ease);
+}
+
+/* Light, the default: every token is defined here first. */
+:root {
+  color-scheme: light;
+
+  /*
+   * Type (docs/plan/35-owner-list-2026-11-04.md section 12.2, APL-01): one scale of named text styles, the classes
+   * `text-caption-2` to `text-large-title` (@theme above), each with its line height. On computers it is the
+   * platform's Small step, body 15 px; under 760 px its Medium step, body 16 px, every style one step up with it (the
+   * block after Dark), so a field's text stays 16 px and iOS does not zoom into it. The line heights are a little
+   * looser than the platform's, drawn for its own font: Noto Sans and Vazirmatn have taller letters and Persian text
+   * needs the room. Titles from 20 px are tightened a little (--tracking-title); smaller text keeps its own spacing.
+   */
+  --fs-caption-2: 11px; /* uppercase labels, table headers, tags, counts */
+  --fs-caption: 11px; /* chips, meta beside a value, times */
+  --fs-footnote: 12px; /* help under a field, errors, fine print, tips */
+  --fs-subhead: 13px; /* field labels, descriptions, secondary lines, small buttons */
+  --fs-callout: 14px; /* buttons, menu items, table cells, tabs */
+  --fs-body: 15px; /* body text, text fields, the main line of a row */
+  --fs-headline: 15px; /* the semibold title of a row, a group or a choice */
+  --fs-title-3: 18px; /* dialog and sheet titles */
+  --fs-title-2: 20px; /* page headings, stat values */
+  --fs-title-1: 26px; /* the sign-in title, headline figures */
+  --fs-large-title: 32px; /* the largest figure of a page */
+  --lh-caption-2: 1.3;
+  --lh-caption: 1.35;
+  --lh-footnote: 1.4;
+  --lh-subhead: 1.4;
+  --lh-callout: 1.4;
+  --lh-body: 1.45;
+  --lh-headline: 1.35;
+  --lh-title-3: 1.3;
+  --lh-title-2: 1.25;
+  --lh-title-1: 1.2;
+  --lh-large-title: 1.15;
+  /* The first names of the scale, which the mockups' classes still use. */
+  --fs-xs: var(--fs-caption-2);
+  --fs-sm: var(--fs-subhead);
+  --fs-base: var(--fs-body);
+  --fs-md: var(--fs-title-3);
+  --fs-lg: var(--fs-title-2);
+  --fs-stat: var(--fs-title-2);
+  --fs-xl: var(--fs-title-1);
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-base: 1.5;
+  --tracking-label: 0.05em; /* the uppercase labels */
+  --tracking-title: -0.01em; /* titles from 20 px */
+
+  /*
+   * Spacing: layouts step in 8 px (--sp-2, 4, 6, 8, 10, 12, 16: between tiles, around groups, the gutters, a
+   * dialog's padding); the 4 px steps between them are for fine detail inside a control or a row (35 section 12.2).
+   */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --gap: 16px; /* between tiles */
+  --gutter: 16px; /* the smallest side gutter, phones */
+  --gutter-wide: 24px; /* side gutter from 760 px */
+
+  /* radius (the Tailwind steps above point here) */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-pill: 999px;
+
+  /* sizes */
+  --topbar-h: 56px;
+  /*
+   * Controls (35 section 12.2): a button, a field, a picker and a menu item are --control-h high, 36 px on computers and
+   * 44 px under 760 px, where a finger needs that much (the block after Dark); small and extra small ones keep a hit
+   * area of --target around them there. A row of a grouped list is at least --row-h.
+   */
+  --control-h: 36px;
+  --control-h-sm: 32px;
+  --control-h-lg: 44px;
+  --control-h-xs: 24px;
+  --target: 44px; /* the smallest hit area on a phone */
+  --row-h: 44px;
+  --content-max: 1320px;
+
+  /* z-index; dialogs and sheets sit above all of these */
+  --z-sticky: 10; /* save bar, sticky section nav */
+  --z-topbar: 20;
+  --z-popover: 40; /* menus */
+  --z-toast: 60;
+  --z-tooltip: 70;
+
+  /*
+   * Motion by springs (35 section 12.2, APL-01; before it 32 section 18.3, MOT-01): only opacity and transforms, as
+   * transitions wherever the motion can be stopped (a dialog, a sheet, a menu, a tip, a switch, a tab's marker), so one
+   * that is stopped turns back from where it is. Three critically damped springs, each a CSS `linear()` curve with the
+   * time it settles in: x(t) = 1 - (1 + wt)e^(-wt), w = 2 pi / response, sampled in even steps until less than 0.5%,
+   * 0.25% and 0.1% of the way is left (under half a pixel of what each one moves). None overshoots: a sheet held to an
+   * edge would show a gap past it. app/motion.ts draws the same springs for scripts (springCurve).
+   *   quick   response 0.2 s, settles in 240 ms: presses, hovers, switches, toggles, menus, tips, pages, what goes
+   *   smooth  response 0.3 s, settles in 400 ms: dialogs, a tab's marker, rows and cards that come, slides into place
+   *   soft    response 0.4 s, settles in 600 ms: sheets and whatever crosses much of the screen
+   */
+  --ease-quick: linear(
+    0,
+    0.04,
+    0.131,
+    0.243,
+    0.358,
+    0.466,
+    0.562,
+    0.645,
+    0.715,
+    0.774,
+    0.821,
+    0.859,
+    0.89,
+    0.914,
+    0.934,
+    0.949,
+    0.96,
+    0.97,
+    0.977,
+    0.982,
+    0.986,
+    0.99,
+    0.992,
+    0.994,
+    1
+  );
+  --dur-quick: 240ms;
+  --ease-smooth: linear(
+    0,
+    0.029,
+    0.097,
+    0.186,
+    0.282,
+    0.376,
+    0.466,
+    0.547,
+    0.619,
+    0.682,
+    0.736,
+    0.782,
+    0.821,
+    0.854,
+    0.881,
+    0.903,
+    0.921,
+    0.936,
+    0.949,
+    0.959,
+    0.967,
+    0.973,
+    0.979,
+    0.983,
+    0.986,
+    0.989,
+    0.991,
+    0.993,
+    0.995,
+    0.996,
+    0.997,
+    0.997,
+    1
+  );
+  --dur-smooth: 400ms;
+  --ease-soft: linear(
+    0,
+    0.024,
+    0.082,
+    0.158,
+    0.243,
+    0.329,
+    0.413,
+    0.491,
+    0.562,
+    0.626,
+    0.682,
+    0.731,
+    0.774,
+    0.81,
+    0.841,
+    0.868,
+    0.89,
+    0.909,
+    0.925,
+    0.938,
+    0.949,
+    0.958,
+    0.965,
+    0.972,
+    0.977,
+    0.981,
+    0.984,
+    0.987,
+    0.99,
+    0.992,
+    0.993,
+    0.994,
+    0.995,
+    0.996,
+    0.997,
+    0.998,
+    0.998,
+    0.998,
+    0.999,
+    0.999,
+    1
+  );
+  --dur-soft: 600ms;
+  /*
+   * The roles, each on its spring (screens and scripts read these names): --dur-fast with --ease times the small changes
+   * (a hover's colors, a press), --dur-med the rail's width, --dur-slow a ring; --ease-out also drives Tailwind's
+   * `ease-out` class and Tailwind's plain `transition` takes the quick spring too (@theme above). The distances are
+   * tokens, so Reduced (below) keeps the fades and moves nothing.
+   */
+  --dur-fast: var(--dur-quick);
+  --dur-med: var(--dur-smooth);
+  --dur-slow: var(--dur-soft);
+  --ease: var(--ease-quick);
+  --ease-out: var(--ease-smooth);
+  --lift: -2px; /* tiles that are links rise this far on hover */
+  --press: 0.97; /* a pressed button, toggle or chip shrinks to this */
+  --dur-pop: var(--dur-quick); /* menus, pickers, popovers and tips come and go */
+  --ease-pop: var(--ease-quick);
+  --dur-leave: var(--dur-quick); /* a dialog, a sheet or a toast goes, a row folds away */
+  --ease-leave: var(--ease-quick);
+  --dur-swap: var(--dur-smooth); /* a tab's marker moves and its content cross-fades */
+  --dur-grow: var(--dur-smooth); /* a dialog grows in, a row or a card comes in */
+  --ease-enter: var(--ease-smooth);
+  /* A page fades and rises in; quick, because the browser holds the clicks while a view transition runs. */
+  --dur-rise: var(--dur-quick);
+  --ease-rise: var(--ease-quick);
+  --dur-slide: var(--dur-soft); /* a sheet slides in from its edge */
+  --ease-slide: var(--ease-soft);
+  --stagger: 30ms; /* between cards that come in one after another */
+  --shift: 4px; /* a menu, picker, popover, tip or card slides this far */
+  --rise: 8px; /* a page rises this far */
+  --shrink: 0.98; /* a dialog grows from this size */
+  --slide: 100%; /* a sheet slides in from its edge, its whole size */
+  --fold: 0; /* a row that goes folds to this height */
+
+  /* surfaces: Tailwind neutral 50, white, 100, 200, 300; the control boundary reaches 3:1 */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f5f5f5;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --control-border: #8a8a8a;
+  /*
+   * What floats (menus, popovers, pickers, dialogs, sheets) stands on --surface-raised, lighter than the tiles in
+   * Dark (35 section 12.2); a pressed row or item turns --surface-press, the darkest gray on which --text-3 keeps
+   * 4.5:1 (4.53, --brand 4.51).
+   */
+  --surface-raised: #ffffff;
+  --surface-press: #eeeeee;
+
+  /* ink */
+  --text: #0a0a0a;
+  --text-2: #525252;
+  --text-3: #6c6c6c;
+
+  /*
+   * Brand: the panel's blue. --brand for text, icons and current items; --brand-strong
+   * for fills under --on-brand, never for text in Light (4.34:1 on surface-2).
+   */
+  --brand: #216dc0;
+  --brand-strong: #2374cc;
+  --brand-weak: #e9f1fa;
+  --on-brand: #ffffff;
+  --focus: #3390ec;
+  --focus-halo: rgba(51, 144, 236, 0.28);
+
+  /*
+   * Status, always with a word or an icon: ok green, info violet (never blue, the brand
+   * is blue, D-327), warn amber, error red, off gray. Weak tints are opaque.
+   */
+  --ok: #067a52;
+  --info: #5f2fb0;
+  --warn: #975400;
+  --error: #b7000f;
+  --off: #6c6c6c;
+  --ok-weak: #e6f2ee;
+  --info-weak: #efeaf7;
+  --warn-weak: #f3eae0;
+  --error-weak: #f9e8e9;
+  --off-weak: #f0f0f0;
+  --on-status: #ffffff; /* text on a solid status fill (count badges, danger hover) */
+  /*
+   * Telegram's button blue, the style `primary` (docs/plan/17 section 10): the Blue swatch of a
+   * button's look and the map's pills of blue buttons, never the violet --info. iOS's #0088ff made
+   * dark enough for white text: --on-tg-blue reads 4.66:1 on it, and stays white in Dark.
+   */
+  --tg-blue: #0073de;
+  --on-tg-blue: #ffffff;
+
+  /* tooltips */
+  --inverse-bg: #0a0a0a;
+  --inverse-text: #fafafa;
+
+  /*
+   * Depth. Tailwind's own shadow-sm, shadow-md and shadow-lg classes keep Tailwind's
+   * values; the tokens are used as `shadow-(--shadow-md)` or var(--shadow-md).
+   */
+  --scrim: rgba(10, 10, 10, 0.42);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 6px 16px -6px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 18px 40px -18px rgba(0, 0, 0, 0.24), 0 4px 10px rgba(0, 0, 0, 0.06);
+  --skel-shine: rgba(255, 255, 255, 0.7);
+
+  /*
+   * shadcn's variables point at the tokens, so the existing classes (bg-primary,
+   * text-muted-foreground, border-input ...) follow both themes. --border is the token
+   * itself.
+   */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--text);
+  --primary: var(--brand-strong);
+  --primary-foreground: var(--on-brand);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-2);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-3);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--text);
+  --destructive: var(--error);
+  --input: var(--control-border);
+  --ring: var(--focus);
+  --radius: var(--r-md);
+}
+
+/* Dark: today's near-black with the lighter blue. */
+.dark {
+  color-scheme: dark;
+
+  --bg: #0a0a0a;
+  --surface: #171717;
+  --surface-2: #262626;
+  --border: #2e2e2e;
+  --border-strong: #3a3a3a;
+  --control-border: #737373;
+  /*
+   * Each layer up is lighter: the page #0a0a0a, the tiles #171717, what floats #1f1f1f (35 section 12.2). On it
+   * --text-3 reads 6.38:1, --brand 6.00, --error 7.41, the control boundary 3.48 and the focus ring 4.98. A pressed or
+   * highlighted item there is #2e2e2e (1.21:1 against it, where --surface-2 would be 1.09): --text-3 5.26, --brand 4.94.
+   */
+  --surface-raised: #1f1f1f;
+  --surface-press: #2e2e2e;
+
+  --text: #fafafa;
+  --text-2: #d4d4d4;
+  --text-3: #a1a1a1;
+
+  --brand: #5a9fef;
+  --brand-strong: #5a9fef;
+  --brand-weak: #202a35;
+  --on-brand: #0a0a0a;
+  --focus: #3390ec;
+
+  --ok: #3ecf8e;
+  --info: #c9b8ff;
+  --warn: #f2b34a;
+  --error: #ff8d8b;
+  --off: #a1a1a1;
+  --ok-weak: #1c2f26;
+  --info-weak: #302e37;
+  --warn-weak: #362d1e;
+  --error-weak: #352626;
+  --off-weak: #2a2a2a;
+  --on-status: #0a0a0a;
+  --tg-blue: #2c72e0; /* iOS Dark's #3e88f7 made dark enough: white 4.57:1, 3.92:1 on the tiles */
+
+  --inverse-bg: #fafafa;
+  --inverse-text: #0a0a0a;
+
+  /*
+   * No small shadows in Dark (borders carry depth). tokens.css writes them as `none`; an
+   * empty shadow looks the same and stays valid inside Tailwind's combined box-shadow, so
+   * `shadow-(--shadow-md)` next to a ring keeps the ring.
+   */
+  --scrim: rgba(0, 0, 0, 0.62);
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 20px 44px -22px rgba(0, 0, 0, 0.72);
+  --skel-shine: rgba(255, 255, 255, 0.06);
+}
+
+/*
+ * Phones, under 760 px (35 section 12.2): the type one step up, the Medium step of the platform's scale with body
+ * 16 px, and the controls 44 px high, the least a finger needs; small ones keep a 44 px hit area (--target).
+ */
+@media (width < 760px) {
+  :root {
+    --fs-subhead: 14px;
+    --fs-callout: 15px;
+    --fs-body: 16px;
+    --fs-headline: 16px;
+    --fs-title-3: 19px;
+    --fs-title-2: 21px;
+    --fs-title-1: 27px;
+    --fs-large-title: 33px;
+    --control-h: 44px;
+    --control-h-sm: 36px;
+    --control-h-lg: 48px;
+    --control-h-xs: 28px;
+  }
+}
+
+/*
+ * How much the panel moves (32 section 18.3, MOT-01): the data-motion attribute on <html>,
+ * on, reduced or off (app/motion.ts): Reduced where the device asks for less motion
+ * (prefers-reduced-motion) and Off while the browser hides the tab, read here, in
+ * components.css and in the variants
+ * above, so no component needs code for it.
+ *
+ * Reduced: nothing moves, only short fades. The distances are zero and the small changes
+ * happen at once; a press still shows, by its colors, without shrinking (35 section 12.2).
+ */
+:root[data-motion='reduced'] {
+  --dur-fast: 0s;
+  --dur-med: 0s;
+  --dur-slow: 0s;
+  --lift: 0px;
+  --press: 1;
+  --shift: 0px;
+  --rise: 0px;
+  --shrink: 1;
+  --slide: 0%;
+  --fold: 1;
+  --stagger: 0ms;
+}
+/*
+ * What does not read the tokens stands still too (17 sections 4.8 and 4.10 step 7, the
+ * mockups' rule): spinners, the live dot, skeletons and every other animation and
+ * transition end at once on their last frame. Under Reduced the design system's comings and
+ * goings still fade (components.css); under Off nothing fades either.
+ */
+:root:is([data-motion='reduced'], [data-motion='off']) *,
+:root:is([data-motion='reduced'], [data-motion='off']) ::before,
+:root:is([data-motion='reduced'], [data-motion='off']) ::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+/*
+ * Base UI would add this rule in a <style> element; the app sets CSPProvider
+ * disableStyleElements so no element without the CSP nonce is created (11 section 6.2).
+ */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Toasts in the tokens (the mockups' .x-toast): the panel font, the large shadow and the
+ * secondary ink for the description; components/ui/sonner.tsx sets the colors through
+ * sonner's variables. sonner's rules are not in a layer (and the dev server also injects
+ * them at run time, after this sheet), so each rule here is more specific than sonner's.
+ */
+[data-sonner-toaster][data-sonner-theme] {
+  font-family: var(--font-sans);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] {
+  box-shadow: var(--shadow-lg);
+  /* The callout style for the message and the subhead for its description (35 section 12.2). */
+  font-size: var(--fs-callout);
+  line-height: var(--lh-callout);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled='true']:focus-visible {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--focus);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-description] {
+  color: var(--text-2);
+  font-size: var(--fs-subhead);
+  line-height: var(--lh-subhead);
+}
+/*
+ * Toasts slide in from their edge and stack with sonner's own motion, on the panel's springs
+ * instead of its 400 ms curve (32 section 18.2, MOT-01; 35 section 12.2): the smooth spring in,
+ * as they move only their own height, the quick one out. Under Reduced they only fade, in place.
+ */
+[data-sonner-toaster] [data-sonner-toast] {
+  transition-duration: var(--dur-smooth);
+  transition-timing-function: var(--ease-smooth);
+}
+[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  transition-duration: var(--dur-leave);
+  transition-timing-function: var(--ease-leave);
+}
+:root[data-motion='reduced'] [data-sonner-toast] {
+  transition: opacity var(--dur-pop) var(--ease-pop) !important;
+}
+/*
+ * A toast's buttons ("View", "Undo") at the small control's height, 36 px on phones, in the footnote style and the
+ * panel's radius instead of sonner's 24 px, so a finger hits them (35 section 12.2, APL-02).
+ */
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-button] {
+  height: var(--control-h-sm);
+  padding-inline: var(--sp-3);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-footnote);
+  font-weight: var(--fw-semibold);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Tabular figures on the whole panel, so live counts and columns do not jitter (D-229). */
+    font-variant-numeric: tabular-nums;
+    /* Text without a style of its own is body text: 15 px, 16 px on phones (35 section 12.2). */
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+  /*
+   * A 2 px focus outline with a 2 px offset (17 section 4.8) on whatever has no focus
+   * style of its own; components with `outline-none` keep their ring.
+   */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background-color: var(--brand-weak);
+    color: var(--text);
+  }
+
+  /*
+   * The shell's layout values (17 section 4.5): --gutter-x is the side gutter of the top
+   * bar and the page (16 px, 24 px from 760 px); --bottom-space is the height of a bar at
+   * the bottom of the screen, 0 without one (xWriter's phone bottom bar; toasts and sticky
+   * bottom bars sit on it), and it feeds the scroll padding below.
+   */
+  html {
+    --gutter-x: var(--gutter);
+    --bottom-space: 0px;
+  }
+  @media (width >= 760px) {
+    html {
+      --gutter-x: var(--gutter-wide);
+    }
+  }
+
+  /*
+   * Keyboard focus and jumps to a section never end under a sticky bar (WCAG 2.2, 2.4.11):
+   * the browser scrolls what it brings into view clear of the scroll padding (UI-27). The
+   * shell's top bar sticks to the top on every screen, and a page's own sticky bar
+   * (data-sticky="top") sticks under it; save bars (data-sticky="bottom") stick to the
+   * bottom.
+   */
+  html {
+    scroll-padding-top: calc(var(--topbar-h) + 1rem);
+    scroll-padding-bottom: calc(var(--bottom-space) + 1rem);
+  }
+  html:has([data-sticky='top']) {
+    scroll-padding-top: calc(var(--topbar-h) + 4.5rem);
+  }
+  html:has([data-sticky='bottom']) {
+    scroll-padding-bottom: calc(var(--bottom-space) + 6rem);
+  }
+}

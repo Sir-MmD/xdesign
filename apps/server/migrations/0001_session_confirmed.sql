@@ -1,0 +1,1 @@
+ALTER TABLE `sessions` ADD `confirmed_until` integer;

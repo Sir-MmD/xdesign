@@ -1,0 +1,33 @@
+# The pnpm workspace (docs/plan/02-architecture.md section 2): one lockfile at the root.
+# pnpm 12 rejects keys it does not know, so a misspelled setting fails instead of being ignored.
+packages:
+  - packages/*
+  - apps/*
+  - tools/sanity
+
+# Refuse package versions published less than 7 days ago (the value is in minutes), as xWriter does.
+minimumReleaseAge: 10080
+# Emergency security fixes only; remove each entry once its version is 7 days old.
+minimumReleaseAgeExclude: []
+
+# Dependency build scripts stay blocked unless listed here (package name: true runs its
+# scripts, false skips them). With strictDepBuilds an install fails with ERR_PNPM_IGNORED_BUILDS
+# when a dependency has a build script and no entry, so each one is a deliberate decision.
+# better-sqlite3 and @node-rs/argon2 need no script: they ship prebuilt binaries.
+strictDepBuilds: true
+allowBuilds:
+  # Its postinstall only checks or fetches the binary that pnpm already installs as the
+  # optional package of this CPU (@esbuild/linux-x64 and the others).
+  esbuild: false
+  # electron-builder's Squirrel.Windows maker; its postinstall picks a 7-Zip binary. The desktop
+  # app is a portable exe (NSIS), so Squirrel is never used (docs/plan/18 section 9.7).
+  electron-winstaller: false
+
+# Peer dependency problems fail the install instead of printing a warning.
+strictPeerDependencies: true
+
+# Every @tiptap package on one version: @tiptap/react depends on its menus with a range, and
+# their newest release wants a newer @tiptap/core than the pinned one.
+overrides:
+  '@tiptap/extension-bubble-menu': 3.31.3
+  '@tiptap/extension-floating-menu': 3.31.3

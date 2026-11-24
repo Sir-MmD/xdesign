@@ -1,0 +1,16 @@
+{
+  "name": "@xdesign/desktop",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "productName": "xDesign",
+  "main": "dist/main.mjs",
+  "scripts": {
+    "build": "node build.ts"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1",
+    "esbuild": "0.28.2"
+  }
+}

@@ -1,0 +1,348 @@
+# golangci-lint v2 configuration of the Go helper, copied from xWriter's .golangci.yml with
+# the linters and settings that apply to the helper (docs/plan/07-server-install-update.md
+# section 10). The owner does not read code, so the linters are strict: anything they report
+# is fixed, or silenced with a //nolint comment that names the linter and explains why
+# (nolintlint enforces both).
+#
+# make sanity runs it (make helper-check). The pinned binary lives in .tools/bin
+# (`make setup-tools`).
+version: '2'
+
+run:
+  timeout: 5m
+  # Paths in exclusions and the ${base-path} placeholder are relative to the go.mod folder.
+  relative-path-mode: gomod
+  modules-download-mode: readonly
+  # Several worktrees may lint at the same time: wait for the lock instead of failing.
+  allow-serial-runners: true
+
+output:
+  sort-order:
+    - file
+    - linter
+
+issues:
+  # Show every issue, never a sample, including several rules failing on one line.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - bodyclose # HTTP response bodies are closed
+    - contextcheck # functions pass on the context they received
+    - depguard # import rules: module ownership and the packages that use the standard library only
+    - errorlint # errors are wrapped with %w and compared with errors.Is and errors.As
+    - exhaustive # switches over enums (kinds, formats, reasons) list every value
+    - forbidigo # root contexts below internal/app, prints
+    - gosec # security smells
+    - misspell
+    - noctx # network and process calls take a context
+    - nolintlint # every //nolint names the linter and gives a reason
+    - revive # golint successor: doc comments on exported identifiers, package comments, naming
+    - unconvert # unnecessary conversions
+    # Added because they find real bugs with almost no false positives.
+    - asasalint # []any passed as a single any to a variadic function
+    - asciicheck # non-ASCII identifiers
+    - bidichk # invisible bidi control characters in source (Trojan Source)
+    - containedctx # context.Context stored in a struct instead of passed as the first argument
+    - copyloopvar # loop variable copies that Go 1.22 made unnecessary
+    - durationcheck # two durations multiplied together
+    - errchkjson # unsupported types passed to encoding/json
+    - errname # sentinel errors start with Err, error types end with Error
+    - fatcontext # contexts nested in loops
+    - gocheckcompilerdirectives # malformed //go: directives
+    - gochecknoinits # no init functions
+    - gochecknoglobals # no global mutable state
+    - gocritic # diagnostic checks only (see settings)
+    - gomoddirectives # no replace, exclude or tool directives in go.mod
+    - goprintffuncname # printf-like functions end with f, so vet checks their format strings
+    - loggercheck # malformed key-value pairs in slog calls
+    - makezero # append to a slice created with a non-zero length
+    - musttag # structs passed to JSON and TOML encoders have field tags
+    - nilerr # returning nil after checking err != nil
+    - nilnesserr # returning a different, nil error after checking err != nil
+    - nosprintfhostport # host:port built with Sprintf breaks IPv6
+    - reassign # reassigning package variables of other packages (io.EOF = ...)
+    - recvcheck # mixed value and pointer receivers on one type
+    - rowserrcheck # rows.Err() is checked after iterating query results
+    - sloglint # injected logger, static lower-case messages
+    - sqlclosecheck # rows and statements are closed
+    - usestdlibvars # http.MethodGet and friends instead of string literals
+    - wastedassign # assignments whose value is never used
+    - wrapcheck # errors from other modules are wrapped with context
+
+  settings:
+    depguard:
+      # How the rules work (depguard v2.2.1, verified in xWriter with throwaway files):
+      # - Every rule whose `files` match a file is applied; an import must pass all of them.
+      # - Package entries are string prefixes; a trailing $ means an exact match; $gostd is the
+      #   standard library.
+      # - Inside ONE list, depguard compares the import with a single candidate: the
+      #   alphabetically closest entry that is not greater. So a prefix entry (no trailing $)
+      #   must not share a list with longer entries that start with it, and a list that uses
+      #   $gostd must not contain entries starting with "go." or "go-" (they would hide the
+      #   "go" entry and reject go/ast). Exact entries such as net$ next to net/http are fine.
+      #   Use separate rules instead; every rule is checked on its own.
+      # - strict: only allowed imports pass; a matching deny entry adds its message unless a
+      #   longer allow entry matches.
+      rules:
+        # Modules xWriter rejected, with the replacement to use instead.
+        rejected-modules:
+          deny:
+            - pkg: github.com/google/uuid
+              desc: use the standard library uuid package (Go 1.27)
+            - pkg: github.com/coreos/go-systemd
+              desc: use an in-house sd_notify over NOTIFY_SOCKET
+            - pkg: github.com/BurntSushi/toml
+              desc: use github.com/pelletier/go-toml/v2 with DisallowUnknownFields
+            - pkg: go.uber.org/zap
+              desc: use log/slog
+            - pkg: github.com/pkg/errors
+              desc: use errors and fmt.Errorf with %w
+            - pkg: log$
+              desc: use log/slog with an injected *slog.Logger
+            - pkg: math/rand$
+              desc: use math/rand/v2 with an injected seeded source, or crypto/rand for secrets
+            - pkg: net/http/pprof
+              desc: profiling endpoints are never mounted in xDesign
+
+        # Module ownership. The archive parsers are used only by internal/unpack, which opens
+        # the packed files an update comes in, internal/payload, which unpacks the embedded
+        # payload (rule payload-imports), and internal/backup, which writes and reads the
+        # backups' tar.zst (zstd only).
+        archives-only-in-unpack:
+          files:
+            - $all
+            - '!${base-path}/internal/unpack/**'
+            - '!${base-path}/internal/payload/**'
+            - '!${base-path}/internal/backup/**'
+          deny:
+            - pkg: github.com/ulikunitz/xz
+              desc: only internal/unpack reads archives (07 section 10)
+            - pkg: github.com/klauspost/compress
+              desc: only internal/unpack reads archives (07 section 10)
+            - pkg: github.com/nwaples/rardecode
+              desc: xDesign takes no rar files (07 section 10)
+        lego-only-in-ssl-acme:
+          files:
+            - $all
+            - '!${base-path}/internal/ssl/acme/**'
+          deny:
+            - pkg: github.com/go-acme/
+              desc: only internal/ssl/acme speaks ACME through lego (07 section 10)
+
+        # The TLS policy and certificate helpers are shared by the front and internal/cli, so
+        # they use the standard library only.
+        certs-imports-stdlib:
+          list-mode: strict
+          files:
+            - '${base-path}/internal/certs/**'
+          allow:
+            - $gostd
+          deny:
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/
+              desc: internal/certs imports only the standard library, so the CLI and the front can share it
+
+        # The release reader is shared by the command line's update and the website's update
+        # check, so it uses the standard library and internal/buildinfo only. internal/unpack
+        # has a rule of its own below.
+        release-imports-stdlib-buildinfo:
+          list-mode: strict
+          files:
+            - '${base-path}/internal/release/**'
+          allow:
+            - $gostd
+            - github.com/Sir-MmD/xdesign/helper/internal/buildinfo$
+          deny:
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/
+              desc: internal/release imports only the standard library and internal/buildinfo (07 section 6.3)
+
+        # The unpacker of the update file adds the two archive libraries (rule
+        # archives-only-in-unpack) to what the release reader may import, and nothing else, so
+        # no other part of the helper reaches the parsers of strangers' files.
+        unpack-imports:
+          list-mode: strict
+          files:
+            - '${base-path}/internal/unpack/**'
+          allow:
+            - $gostd
+            - github.com/Sir-MmD/xdesign/helper/internal/buildinfo$
+            - github.com/Sir-MmD/xdesign/helper/internal/release$
+            - github.com/klauspost/compress/zstd
+            - github.com/ulikunitz/xz
+          deny:
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/
+              desc: internal/unpack imports only the standard library, internal/buildinfo, internal/release and the archive libraries (07 section 10)
+
+        # The payload of a release build is a tar.zst made by build.sh: its reader needs zstd
+        # and the standard library, nothing else.
+        payload-imports:
+          list-mode: strict
+          files:
+            - '${base-path}/internal/payload/**'
+          allow:
+            - $gostd
+            - github.com/klauspost/compress/zstd
+          deny:
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/
+              desc: internal/payload imports only the standard library and the zstd reader (07 section 2)
+
+        app-only-from-cmd:
+          files:
+            - $all
+            - '!${base-path}/cmd/**'
+            - '!${base-path}/internal/app/**'
+          deny:
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/app$
+              desc: only cmd/... imports internal/app
+            - pkg: github.com/Sir-MmD/xdesign/helper/internal/app/
+              desc: only cmd/... imports internal/app
+
+    errcheck:
+      # Type assertions without ", ok" panic on a wrong type.
+      check-type-assertions: true
+      # Command output goes to injected io.Writer values (stdout and stderr); a failed terminal
+      # write cannot be handled. Writes to files, connections and HTTP responses have other
+      # static types and are still checked.
+      exclude-functions:
+        - fmt.Fprint(io.Writer)
+        - fmt.Fprintf(io.Writer)
+        - fmt.Fprintln(io.Writer)
+
+    forbidigo:
+      analyze-types: true
+      forbid:
+        # Allowed only in cmd and internal/app (exclusion below).
+        - pattern: ^context\.(Background|TODO)$
+          msg: pass the caller's ctx; only cmd and internal/app create root contexts
+        - pattern: ^(fmt\.Print(f|ln)?|print|println)$
+          msg: write to an injected io.Writer or log with an injected *slog.Logger
+
+    gocritic:
+      # Only the checks that point at likely bugs; the style checks are left out.
+      disable-all: true
+      enabled-tags:
+        - diagnostic
+
+    gomoddirectives:
+      exclude-forbidden: true
+      ignore-forbidden: true
+      # Developer tools are never tool directives in go.mod.
+      tool-forbidden: true
+      check-module-path: true
+
+    gosec:
+      excludes:
+        - G104 # unhandled errors: errcheck covers them, with the exclusions configured above
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment # memory layout of structs: noise
+        - findcall # a demonstration analyzer
+        - shadow # shadowed err variables: noise
+
+    misspell:
+      locale: US
+      ignore-rules:
+        # The code copied from xWriter spells it "cancelled", as xWriter's data model does.
+        - cancelled
+        - cancelling
+
+    musttag:
+      functions:
+        - name: github.com/pelletier/go-toml/v2.Unmarshal
+          tag: toml
+          arg-pos: 1
+        - name: github.com/pelletier/go-toml/v2.Marshal
+          tag: toml
+          arg-pos: 0
+        - name: (*github.com/pelletier/go-toml/v2.Decoder).Decode
+          tag: toml
+          arg-pos: 0
+        - name: (*github.com/pelletier/go-toml/v2.Encoder).Encode
+          tag: toml
+          arg-pos: 0
+
+    nolintlint:
+      allow-unused: false
+      require-explanation: true
+      require-specific: true
+
+    revive:
+      # The default rule set (exported, package-comments, var-naming, error-strings, ...) plus
+      # the bug-finding rules below.
+      enable-default-rules: true
+      rules:
+        - name: exported
+          arguments:
+            - check-public-interface
+        - name: atomic
+        - name: constant-logical-expr
+        - name: datarace
+        - name: deep-exit
+        - name: defer
+        - name: filename-format
+          arguments:
+            - ^[a-z0-9_]+\.go$ # snake_case.go
+        - name: forbidden-call-in-wg-go
+        - name: identical-branches
+        - name: identical-ifelseif-branches
+        - name: identical-ifelseif-conditions
+        - name: identical-switch-branches
+        - name: identical-switch-conditions
+        - name: modifies-value-receiver
+        - name: package-directory-mismatch
+        - name: redundant-build-tag
+        - name: struct-tag
+        - name: time-date
+        - name: time-equal
+        - name: unconditional-recursion
+        - name: waitgroup-by-value
+
+    sloglint:
+      no-global: all # the logger is injected through constructors
+      static-msg: true # values go into attributes, never into the message
+      msg-style: lowercased
+      key-naming-case: snake
+      forbidden-keys:
+        - time
+        - level
+        - msg
+        - source
+
+    wrapcheck:
+      # Errors from this module already carry context; errors from the standard library and
+      # other modules are wrapped where they enter it.
+      ignore-package-globs:
+        - github.com/Sir-MmD/xdesign/helper/*
+      extra-ignore-sigs:
+        # errgroup returns the (already wrapped) error of one of our own goroutines.
+        - errgroup.Group).Wait(
+        # ctx.Err() is returned as is so callers can match context.Canceled and DeadlineExceeded.
+        - (context.Context).Err(
+
+  exclusions:
+    generated: strict # files with the standard "Code generated ... DO NOT EDIT." line
+    rules:
+      - linters: [forbidigo]
+        path: ^(cmd|internal/app)/
+        text: context\.(Background|TODO)
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+    goimports:
+      local-prefixes:
+        - github.com/Sir-MmD/xdesign/helper
+  exclusions:
+    generated: strict

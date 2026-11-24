@@ -1,0 +1,150 @@
+/* The text editor inside the bubble (TXT-01, docs/plan/04 section 5.2): it lives in the
+   preview's shadow root next to preview.css, so it takes the text's font, size, line height and
+   colors from `.tg-text`, and adds only what editing needs (Q-28: the bubble keeps its look).
+   TipTap's own stylesheet goes to the page's head, outside the shadow root, so its few needed
+   rules are here (without its ligature switch, which would change the text). */
+
+/* The slot's own box adds none: the text and the info row's room flow in `.tg-text`. */
+.xd-text {
+  display: contents;
+}
+
+.xd-text .ProseMirror {
+  position: relative;
+  outline: none;
+  cursor: text;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.xd-text .ProseMirror p {
+  margin: 0;
+}
+
+.xd-text .ProseMirror [contenteditable='false'] {
+  white-space: normal;
+}
+
+.xd-text img.ProseMirror-separator {
+  display: inline !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.xd-text .ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+
+.xd-text .ProseMirror-hideselection {
+  caret-color: transparent;
+}
+
+/* A code block or quote that opens the text, as `.tg-text > .tg-pre.first` in the bubble. */
+.tg-text .ProseMirror .tg-pre.first {
+  margin-top: var(--tg-code-first-margin);
+}
+
+.tg-bubble > .tg-body:first-child > .tg-text .ProseMirror .tg-pre.first {
+  border-top-right-radius: var(--tg-code-first-radius);
+}
+
+.tg-text .ProseMirror .tg-quote.first {
+  margin-top: var(--tg-quote-first-margin);
+  padding-top: var(--tg-quote-first-pad);
+}
+
+/* The look's code header and quote marks are drawings; a click in a quote places the caret. */
+.xd-text .tg-pre-header,
+.xd-text .tg-pre-copy-bar {
+  user-select: none;
+}
+
+.xd-text .tg-quote.expandable {
+  cursor: text;
+}
+
+/* A spoiler: the bubble's dots; its text shows while the editor has the focus. */
+.xd-text .xd-spoiler {
+  border-radius: var(--tg-spoiler-radius);
+  background-image: radial-gradient(
+    circle,
+    var(--tg-spoiler-dots) var(--tg-spoiler-dot),
+    transparent var(--tg-spoiler-dot-edge)
+  );
+  background-size: var(--tg-spoiler-cell) var(--tg-spoiler-cell);
+}
+
+.xd-text .ProseMirror:not(.ProseMirror-focused) .xd-spoiler {
+  color: transparent;
+  animation: tg-dots 1.75s ease-in-out infinite alternate;
+}
+
+.xd-text .ProseMirror:not(.ProseMirror-focused) .xd-spoiler * {
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xd-text .ProseMirror:not(.ProseMirror-focused) .xd-spoiler {
+    animation: none;
+  }
+}
+
+/* Variables and text parts: chips in the link's color. */
+.xd-text .xd-chip {
+  padding: 0 0.15em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tg-link) 14%, transparent);
+  color: var(--tg-link);
+  white-space: nowrap;
+}
+
+.xd-text .xd-chip.selected,
+.xd-text .ProseMirror-selectednode {
+  outline: 2px solid var(--tg-link);
+  outline-offset: 0;
+}
+
+/* Other people's carets and selections in their colors, with their names. */
+.xd-text .xd-caret {
+  position: relative;
+  margin-right: -1px;
+  margin-left: -1px;
+  border-right: 1px solid;
+  border-left: 1px solid;
+  pointer-events: none;
+  word-break: normal;
+}
+
+.xd-text .xd-caret-label {
+  position: absolute;
+  bottom: 100%;
+  left: -1px;
+  padding: 1px 4px;
+  border-radius: 3px 3px 3px 0;
+  color: #ffffff;
+  font-family: var(--tg-font);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* A language without its text yet: the default text greyed, and how to write it. */
+.xd-untranslated {
+  cursor: text;
+}
+
+.xd-untranslated-text {
+  opacity: 0.45;
+}
+
+.xd-untranslated-note {
+  display: block;
+  color: var(--tg-meta);
+  font-size: 0.85em;
+  font-style: italic;
+}

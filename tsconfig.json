@@ -1,0 +1,14 @@
+{
+  // `tsc -b` checks every package and app through these references (make typecheck).
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./packages/spec" },
+    { "path": "./packages/spec/scripts" },
+    { "path": "./packages/api" },
+    { "path": "./packages/preview" },
+    { "path": "./apps/web" },
+    { "path": "./apps/server" },
+    { "path": "./apps/desktop" }
+  ]
+}

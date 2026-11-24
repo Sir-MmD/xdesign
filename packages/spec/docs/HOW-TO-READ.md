@@ -1,0 +1,372 @@
+# How to read this export
+
+This export is one Telegram bot designed in xDesign: every message, button, question and
+branch, exact enough to build the bot without asking. This guide is written for the developer
+who builds the bot, or for Claude doing it. The bot runs in private chats and targets **Bot API
+10.5**. Read this guide once, then build from `spec.json` with `design.md` open beside it.
+
+## 1. The files
+
+| File | What it is |
+|---|---|
+| `spec.json` | The design, exact and complete. **The source of truth**: build from it. |
+| `design.md` | The same design for reading: the map (Mermaid), every step with its pictures, texts, buttons and logic in sentences, the variables, the media and the checks. Where it seems to differ from `spec.json`, `spec.json` is right. |
+| `HOW-TO-READ.md` | This guide. |
+| `bot-spec.schema.json` | The JSON Schema of `spec.json`, format version 1. |
+| `media/` | Every uploaded file the design uses. `spec.json` names each one in `media` by its path. |
+| `pictures/` | What each message looks like in Telegram, per language: `<step>.<language>.png`, and `bot-profile`, `empty-chat` and `commands-menu`. They are for looking only: never send them. An export made with "No pictures" has none. |
+
+## 2. Reading `spec.json`
+
+- `format` is `"xdesign.bot-spec"` and `formatVersion` is `1`. Version 1 only ever gains
+  optional fields and new kinds: ignore fields you do not know. A change that renames, removes
+  or changes the meaning of a field makes version 2, and this guide then names the differences.
+- `telegram.botApi` is the Bot API version the design was checked against; `telegram.chats` is
+  `"private"`.
+- `languages`: `default`, `all` (the exported ones) and `rightToLeft`.
+- `bot`: name, about, description, profile photo, menu button and the commands menu.
+- `startPoints`: what starts a conversation. `steps`: every other box on the map, of the kinds
+  `message`, `question`, `if`, `remember`, `wait`, `devStep`, `goTo`, `end`, `invoice` and
+  `action`.
+- `parts`, `variables`, `testSwitches`, `media`, `checks`, `notes` (sticky notes on the map)
+  and `sections` (the frames around steps).
+- **ID names.** Every step, button, variable, test switch and part has an `id` such as
+  `main_menu`: a letter `a` to `z`, then up to 47 of `a` to `z`, `0` to `9` and `_`. Every
+  reference is an ID name, and ID names do not change between exports unless the designer
+  changed them, so use them in code (state names, callback data, variable keys).
+- **Arrows.** `next`, `target`, `goTo`, `otherwise`, `afterMaxTries` and the like are the ID
+  name of the step to go to, `"back"` (the message step the user came from, section 5), or
+  `null` for no arrow yet (the bot then stays where it is). A button's `target` can also be
+  `"stay"`: the message stays as it is (a popup, a remember, or both).
+- **Texts.** A text has one entry per language, each with `text` (plain, a `{idName}`
+  placeholder for each variable), `entities` (Telegram `MessageEntity` objects for `text`),
+  `html` (the same text as Telegram HTML), `variables` (where each placeholder is in `text`)
+  and `rich` (the designer's document; you do not need it). Section 4 says how to send them.
+- **Buttons** sit in their keyboards, row by row. A row is either a list of buttons or a placed
+  row part `{ "part", "buttons" }` whose rows are already expanded: treat them as ordinary rows.
+  Each button has `label` per language, `look`, `icon`, `does` (what a press does) and a
+  `telegram` block.
+- **`telegram` blocks** name the Bot API side so you never guess: a step's `method`,
+  `parseMode` and `replyMarkup` (and for a question `waitsFor`); an action's `method` and
+  `params`; a start point's `update`, `status`, `command`, `payload` and `match`; a button's `button` field, `suggestedCallbackData`, `style`,
+  `icon_custom_emoji_id`, `onClick` (the calls a press makes, in order) and, for a bottom
+  keyboard button, `update` (what a press sends the bot).
+- `cameFrom` on a step lists the start points, steps and buttons with an arrow into it.
+- `parts` lists every part once; row parts there have buttons without `telegram` (it depends on
+  the message the part is placed in), so read buttons from the keyboards.
+- `media`: an uploaded file `{ id, kind, file, name, mime, bytes, width?, height?, durationMs? }`
+  (`file` is its path in `media/`), or a placeholder `{ id, kind, placeholder }` that you fill
+  ("product photo": the designer expects you to supply it). A message names its file by `id`.
+- `checks`: the issues found at export time (section 9).
+
+## 3. Every concept and its Bot API mapping
+
+| xDesign | In `spec.json` | Bot API |
+|---|---|---|
+| Start point "command" | `startPoints[]`, `trigger.type: "command"` | A `message` whose text is `/<command>`, alone or followed by a space and more text, or `/<command>@<bot username>` |
+| `/start` | the command `start` | The same; Telegram sends `/start` when the user opens the bot and presses Start |
+| Start link | `trigger.type: "startLink"`, `payload`, `match` | `t.me/<bot>?start=<payload>` (`<bot>` is `bot.username` when the design names it) arrives as the text `/start <payload>`; `exact` matches the whole payload, `prefix` its start, and `saveRestTo` keeps the rest (`ref_123` with the prefix `ref_` saves `123`) |
+| Start point "anything else" | `trigger.type: "fallback"`, `accepts` | Any `message` nothing else takes: `any`, `text` only, or `media` only (photo, video, GIF, audio, voice, file, round video, sticker) |
+| Message step | `steps[]` of kind `message`, `telegram.method` | `sendMessage`, `sendPhoto`, `sendLivePhoto`, `sendVideo`, `sendAnimation`, `sendAudio`, `sendVoice`, `sendDocument`, `sendVideoNote`, `sendSticker`, `sendMediaGroup` (an album, which takes no `reply_markup`), `sendLocation` (`live_period`), `sendVenue`, `sendContact` |
+| Caption, spoiler, caption above | `caption`, `spoiler`, `captionAbove` | `caption` with `caption_entities` or `parse_mode`, `has_spoiler`, `show_caption_above_media` |
+| Poll, quiz | `message.type` `poll` or `quiz`, `telegram.params` | `sendPoll`: `question` (send its `text` with only its `custom_emoji` entities: Telegram takes no other formatting in a question), `options` as `InputPollOption` texts per language (no formatting), and `params` as they are: `type` (`regular` or `quiz`), `is_anonymous` (`anonymous`), `allows_multiple_answers` (`multiple`), `allows_revoting` (`revote`), `shuffle_options` (`shuffle`), `allow_adding_options` (`addOptions`), `hide_results_until_closes` (`hideResults`), `open_period` (`closeAfterSec`) or `close_date` (`closeAt`, a Unix time) |
+| Quiz answer and explanation | `correct`, `explanation` | `correct_option_ids` (0-based indexes, Bot API 9.6); `explanation` with `explanation_parse_mode`, shown after a wrong answer |
+| Dice | `message.type: "dice"`, `emoji` | `sendDice` with `emoji`; the value Telegram rolled is `message.dice.value` of the sent message. A dice message in a private chat can be deleted only after 24 hours |
+| Saved vote or roll | `message.saveTo`, `telegram.saveFrom` | Save in the variable `saveTo` (by ID name): for a poll the text of the chosen option in the default language (several joined with `, `), for a quiz yes when the answer is right, else no, from the `poll_answer` update (`option_ids`; only non-anonymous polls send it); for a dice the number from `result.dice.value` of the message `sendDice` returns |
+| Paid media | `message.type: "paidMedia"`, `items`, `stars` | `sendPaidMedia`: `star_count`, `media` as `InputPaidMediaPhoto`, `InputPaidMediaVideo` or `InputPaidMediaLivePhoto` (1 to 10), `caption`, `show_caption_above_media`; the Stars go to the bot. A purchase arrives as `purchased_paid_media` only when the media was sent with a `payload` (send the step's ID name) |
+| Rich message | `message.type: "rich"`, `blocks`, `rtl` | `sendRichMessage` (Bot API 10.1) with `rich_message` as `InputRichMessage.blocks` and `is_rtl`: `paragraph`, `footer`, `heading` (`InputRichBlockSectionHeading`, `size` 1 to 6), `code` (`InputRichBlockPreformatted` with `language`), `quote` (`blockquote`, or `expandable_blockquote` when `expandable`, with `credit`), `list` (`InputRichBlockListItem`s, `type: "1"` when `ordered`, `has_checkbox` and `is_checked` from `checked`), `table` (`cells` with `is_header`, `caption`, `is_bordered`, `is_striped`, `is_compact`), `details` (`summary`, `is_open`), `divider`, `media` (`photo`, `video`, `animation`, `audio`, `voice_note` or `document` by the file's kind, with `caption` and `has_spoiler`) and `buttons` (`InputRichBlockButtons`: a row of 1 to 8 `RichMessageButton`s inside the message, `align`). Each text is a `RichText` (send its `html` in a paragraph; table cells take inline formatting only). At most 32768 characters, 500 blocks, 50 media and 20 table columns |
+| Buttons inside a rich message | `blocks[].buttons` | `RichMessageButton` with `text` and `style` as the button's look; a press arrives as a `callback_query` like an inline button's and is answered with `answerCallbackQuery` |
+| Write it out like a draft | `options.draft`, `telegram.draftMethod` | `sendMessageDraft` (text, Bot API 9.5) or `sendRichMessageDraft` (rich message, 10.1) in private chats only: send growing parts of the text with the same non-zero `draft_id` (changes animate), then the complete message with `telegram.method` within 30 seconds (the draft is only a preview) |
+| Stopping a draft | `options.draftStop`, `options.draftKeep`, `onStop`, `telegram.draftStop` | Pass `can_stop: true` (Bot API 10.3) with every draft, and `keep_on_stop: true` when `options.draftKeep`: the user sees a button to stop the draft. A press sends the update `stopped_message_generation` (`MessageGenerationStopped` with `chat` and the `draft_id`; add it to `allowed_updates`): stop writing, do not send the complete message, and go on to `onStop` (null: nothing more). A kept draft still disappears after a short time or once the bot sends a message; send it as a new message to keep it |
+| Invoice | `steps[]` of kind `invoice`, `invoice`, `telegram.method`, `telegram.params` | `sendInvoice`: `title`, `description`, `payload` (`invoice.payload`, at most 128 bytes), `currency` (`XTR` for Telegram Stars with an empty `provider_token`; any other is a card currency with your payment provider's token from BotFather), `prices` as `LabeledPrice` (each `label` in the user's language, `amount` in the smallest unit of the currency: `145` is US$ 1.45, whole Stars for `XTR`; one line for Stars), `photo_url` (host `invoice.photo` yourself), and `params` as they are (`need_name`, `need_phone_number`, `need_email`, `need_shipping_address`, `is_flexible` for physical goods paid by card). A subscription (`invoice.subscription`) is made with `createInvoiceLink` and `subscription_period` 2592000 (30 days): send its link in a `url` button in place of the pay button, on a plain message with the invoice's title in bold over its description (the phone in xDesign draws it so; Telegram has no invoice card for a subscription) |
+| Pay button | `does.type: "pay"` | `pay: true`, the first button of the invoice's first row; without a keyboard Telegram shows its own "Pay" button. "⭐" and "XTR" in its text show as a Star |
+| Shipping | `invoice.physical.shippingOptions` | With `is_flexible` Telegram sends a `shipping_query` with the address: answer with `answerShippingQuery` and these `ShippingOption`s (`id`, `title` in the user's language, one `LabeledPrice` labeled with the title), or `ok: false` with an `error_message` |
+| Pre-checkout check | `checkout`, `telegram.payment` | A `pre_checkout_query` arrives once the user confirms: answer with `answerPreCheckoutQuery` within 10 seconds, `ok: true`, or `ok: false` with `checkout.refuse` as the `error_message`. `checkout: null`: always `ok: true` |
+| Paid | the invoice's `next` | `message.successful_payment` (match it by `invoice_payload`); keep `telegram_payment_charge_id`, a refund needs it. Deliver only after this message |
+| Start points "Payment done", "Refund" | `trigger.type` `paymentDone`, `refunded`, `invoice` | `message.successful_payment` that the invoice's `next` does not take (a subscription paid again: `is_recurring` without `is_first_recurring`; or an invoice without `next`), and `message.refunded_payment`; `invoice: null` takes those of every invoice |
+| Refund | `steps[]` of kind `action`, `action.type: "refund"`, `action.invoice` | `refundStarPayment` with the user's ID and the `telegram_payment_charge_id` of their payment of that invoice; Stars payments only (refund a card payment with your payment provider) |
+| "Has paid", "is subscribed" | condition items `hasPaid`, `subscribed` | Your own records: the user has a `successful_payment` of that invoice that was not refunded; for `subscribed`, its `subscription_expiration_date` is still ahead |
+| Start point "Subscription changed" | `trigger.type: "subscriptionChanged"`, `invoice`, `state`, `telegram.status` | The `subscription` update (`BotSubscriptionUpdated`, Bot API 10.2) with `state` `canceled` (the user canceled it), `active` (turned back on) or `failed` (a renewal could not be paid); match the invoice by `invoice_payload`. `invoice: null` takes every subscription, `state: null` every change |
+| Start points "User blocks the bot", "User restarts the bot" | `trigger.type` `userBlocks`, `userRestarts`, `telegram.status` | `my_chat_member` (in a private chat Telegram sends it only for these two) with `new_chat_member.status` `kicked` (blocked) or `member` (unblocked). After a block every send to the user fails (403 Forbidden) until they restart the bot, so the steps after "User blocks the bot" only keep records (check E30). Telegram's Restart button also sends `/start` right after the unblock, which starts `/start` as usual |
+| Broadcast | `trigger.type: "broadcast"`, `audience`, `when` | No update: start it yourself at the time `when` gives, for every user who started the bot and did not block it (`"everyone"`), or for each of them the condition `audience` holds for (as an If's `when`, section 5). Send at most about 30 messages per second in all; `allow_paid_broadcast: true` on each send allows up to 1000 (0.1 Stars per message above the free rate, paid broadcasts enabled in BotFather) |
+| Reaction | `steps[]` of kind `action`, `action.type: "react"`, `emoji`, `onStep`, `big`, `telegram.params` | `setMessageReaction` with `reaction` and `is_big` from `params` (one `ReactionTypeEmoji`), on the message the step `onStep` sent this user last, or on the user's last message (`"userMessage"`) |
+| Pin, unpin | `action.type` `pin`, `unpin`, `step` | `pinChatMessage`, `unpinChatMessage` with the `message_id` of the message `step` sent this user last; an unpin with `step: null` leaves out `message_id` and unpins the newest pinned message. Telegram never notifies about a pin in a private chat |
+| Delete | `action.type: "delete"`, `step` | `deleteMessage` with the `message_id` of the message `step` sent last; Telegram deletes only within 48 hours of sending (a dice message only after 24 hours) |
+| Gift | `action.type: "gift"`, `giftDescription`, `text`, `payForUpgrade` | `sendGift` with `user_id`, the `gift_id` of the gift `giftDescription` names (look it up with `getAvailableGifts`), `text` with its `entities` as `text_entities` (0 to 128 characters; Telegram keeps only bold, italic, underline, strikethrough, spoiler, custom emoji and date and time) and `pay_for_upgrade` (`params`). The bot pays from its Stars balance |
+| Chat action | `action.type: "chatAction"`, `action` | `sendChatAction` with `action` (`params`): shown for 5 seconds at most, or until the bot's next message |
+| Options | `options` | `silent`: `disable_notification`; `protect`: `protect_content`; `linkPreview`: `link_preview_options` (`is_disabled`, `url`, `prefer_small_media` or `prefer_large_media`, `show_above_text`); `effect`: `message_effect_id`; `chatAction`: `sendChatAction` before sending (Telegram shows it for 5 seconds at most; send it again for longer); `delaySec`: wait that long before sending |
+| Inline keyboard | `keyboard.type: "inline"` | `InlineKeyboardMarkup`; `openReplyField` is its `force_reply` (Bot API 10.3) |
+| Bottom keyboard | `keyboard.type: "reply"` | `ReplyKeyboardMarkup`: `oneTime` is `one_time_keyboard`, `persistent` `is_persistent`, `resize` `resize_keyboard`, `placeholder` `input_field_placeholder`, `openReplyField` `force_reply` |
+| Remove the bottom keyboard | `keyboard.type: "removeReply"` | `ReplyKeyboardRemove` (`remove_keyboard: true`) |
+| Force a reply | `keyboard.type: "forceReply"` | `ForceReply` (`force_reply: true`, `input_field_placeholder`) |
+| "Go to a step" button | `does.type: "goTo"` | `callback_data`: send `suggestedCallbackData` (the button's ID name, at most 48 bytes, under Telegram's 64) |
+| Link, copy, log-in buttons | `url`, `copyText`, `loginUrl` | `url`; `copy_text` (`CopyTextButton`); `login_url` (`LoginUrl` with `request_write_access`; the domain must be the one linked with the bot in BotFather) |
+| Disabled button | `disabled: true` | `disabled` (`DisabledButton`, Bot API 10.3): shown, sends nothing |
+| Bottom keyboard buttons | `does.type` `text`, `sharePhone`, `shareLocation`, `pickUsers`, `pickChat`, `createPoll` | `KeyboardButton` with only `text`, or `request_contact`, `request_location`, `request_users`, `request_chat`, `request_poll`; `telegram.update` is the message a press sends (`message.text`, `message.contact`, `message.location`, `message.users_shared`, `message.chat_shared`, `message.poll`). `request_id` is any signed 32-bit number unique within the message |
+| Button look | `look` | `style`: left out for `default`, else `primary` (blue), `success` (green) or `danger` (red) (Bot API 9.4) |
+| Button icon | `icon.customEmojiId` | `icon_custom_emoji_id` (section 8) |
+| A press of a "go to" button | `telegram.onClick` | `answerCallbackQuery` first, always; then `editMessageText`, `editMessageMedia`, `editMessageCaption` or `editMessageReplyMarkup` (show by "Edit this message"), a `send*` (show by "Send a new message"), or `deleteMessage` then a `send*` ("Delete this one and send a new one"). `editMessage*` or `send*` means the step shown is known only when the bot runs (`back`, an If, a wait, a developer step): pick the method then, by section 6 |
+| Popup | `does.popup` | `answerCallbackQuery` with `text` (a toast), and `show_alert: true` for an alert; at most 200 characters |
+| Question | kind `question`, `telegram.waitsFor` | Send the prompt, then wait for the user's next `message` of the listed kind (section 5) |
+| Commands menu | `bot.commands` | `setMyCommands` with the scope `all_private_chats`, once per language with `language_code`, and once without it in the default language |
+| Name, about, description | `bot.name`, `bot.about`, `bot.description` | `setMyName`, `setMyShortDescription`, `setMyDescription`, per `language_code` as above |
+| Profile photo | `bot.photo` | `setMyProfilePhoto` (`InputProfilePhotoStatic` for a JPEG, `InputProfilePhotoAnimated` for an MPEG-4; an upload, never a `file_id`) |
+| Menu button | `bot.menuButton` | `setChatMenuButton` without `chat_id`: `MenuButtonCommands` for `commands`, `MenuButtonDefault` for `default` |
+| `back` | target `"back"` | No Bot API call: the per-user history of section 5 |
+| If, Remember, Wait, Go to, End, developer step | their kinds | No Bot API call: the bot's own logic (section 5) |
+
+Set up the bot once with the setup calls above (name, descriptions, photo, commands, menu
+button) rather than on every start.
+
+## 4. Texts
+
+Every text comes in two equal forms; pick one for the whole bot.
+
+1. **HTML.** Send `html` with `parse_mode: "HTML"`. Replace each `{idName}` of the text's
+   `variables` with the variable's value, **HTML-escaped**: `&` as `&amp;`, `<` as `&lt;`, `>`
+   as `&gt;` (and `"` as `&quot;`). An unescaped value can break the message or change its
+   formatting.
+2. **Entities.** Send `text` with `entities` and no `parse_mode`. Replace each placeholder at its
+   `offset` and `length` (from `variables`) with the plain value, and shift the entities: offsets
+   and lengths count **UTF-16 code units** (`value.length` in JavaScript; in Python
+   `len(value.encode("utf-16-le")) // 2`). Going from the last placeholder to the first, with
+   `delta = valueLength - placeholderLength`: an entity that starts at or after the
+   placeholder's end moves by `delta`; an entity that starts at or before the placeholder's
+   start and ends at or after its end grows by `delta`.
+
+If a text also contains a `{idName}` the designer typed as plain characters, only the entities
+form tells the two apart (its `variables` list only the real placeholders).
+
+- A variable with no value yet is replaced by an empty text.
+- Plain texts (button labels, popups, copy texts, links, placeholders of the input field) may
+  hold `{idName}` too: replace it with the plain value, URL-encoded inside a link.
+- A text part is already written into each text where it is placed.
+- A custom emoji is `<tg-emoji emoji-id="...">` in `html` and a `custom_emoji` entity in
+  `entities`, with a normal emoji inside as its fallback (section 8).
+- A text missing in a language (check W03) falls back to the default language's text.
+
+## 5. How the bot behaves, step by step
+
+**Per-user state.** For each user the bot keeps:
+
+- the current step (or none after an End, section below);
+- the variables: saved answers, remembered values and developer outputs. Built-in variables
+  come from the update: `first_name`, `last_name`, `username` and `user_id` from `from`,
+  `language` from `from.language_code`, `is_premium` from `from.is_premium`;
+- the back history: the message steps and questions shown, newest last;
+- the message the user can press buttons in (its `message_id` and which step it shows), for
+  edits, and the bottom keyboard currently shown (its buttons, to recognize a press);
+- what the bot waits for: a question (its step and the wrong tries so far), a Wait in progress
+  (its step, when it ends, `ifUserActs`, `stopWhen`), a message held back by a delay or a chat
+  action;
+- the `message_id` of the newest message each step sent the user (actions act on it) and of the
+  user's own newest message, and whether the user blocked the bot.
+
+**Start points.** A command (a `command` start point, or `/start` for start links) starts its
+start point whatever the user was doing, including while a question waits; commands ignore
+case. A start link with `match: "exact"` takes `/start <payload>` exactly; with `"prefix"` any
+payload that starts with `payload`, saving the rest to `saveRestTo`. When several match, the
+exact one wins, then the longest prefix; `/start` with a payload no start link takes goes to the
+`/start` command. Then the start point goes to `next`.
+
+**Message steps.** Send the message (after `delaySec` and the chat action, when set). With a
+`next` arrow ("Then"), go on at once without a press. With buttons, wait for a press. A message
+with neither waits for a command (check W10 warns about it).
+
+**Polls and quizzes.** A poll or quiz message with a `next` arrow goes on once the user votes:
+a vote in a poll that is not anonymous arrives as `poll_answer`; in an anonymous one only as a
+`poll` update with the new counts (in a private chat the only voter is the user). Keep the
+sent poll's `poll.id` with its step to know which one was answered. Buttons under the poll work
+as above meanwhile.
+
+**Invoices.** Send the invoice and wait: a press of its pay button opens Telegram's payment
+sheet (no `callback_query`). With flexible shipping answer the `shipping_query`, then always the
+`pre_checkout_query` (the `checkout` check, within 10 seconds), and go to `next` when
+`successful_payment` arrives. The user may pay an invoice long after it was sent, or press
+other buttons meanwhile: match each payment to its step by `invoice_payload`. Telegram sells
+digital goods and services only in Stars (check E24).
+
+**Presses of inline buttons** arrive as `callback_query`. Answer every press with
+`answerCallbackQuery`, with the popup's text when there is one, then follow `onClick`: apply
+the button's `remember` actions, then show the target as the button says. Find the button by
+its callback data; several messages may show the same button (row parts), so look at the
+message that was pressed to know where the user is.
+
+**Presses of bottom keyboard buttons** arrive as messages: the button's text in the user's
+language, or a `contact`, `location`, `users_shared`, `chat_shared` or `poll` message. Match
+them against the bottom keyboard currently shown. Apply the button's `remember` actions or save
+the shared value to `saveTo` (a phone number, `"latitude, longitude"`, the user ID, the chat ID
+or the poll's question), then go to its `goTo`. A button with no `goTo` while a question waits
+is the answer to that question.
+
+**Questions.** Send the prompt (a message, with its own buttons, which work as above) and wait
+for the next message of a kind in `waitsFor`:
+
+- `text`, `number`, `email` take a text; `phone` a shared contact or typed digits (5 to 15
+  digits, with `+`, spaces, brackets, dots or dashes); `location` a location or a venue;
+  `photo`, `video`, `file` (a document), `voice`, `audio` that kind of file; `any` anything.
+- Trim the text. Read Persian (۰ to ۹) and Arabic (٠ to ٩) digits as 0 to 9 in numbers,
+  phones and patterns. Lengths count characters (Unicode code points).
+- `checks`: `minLength`, `maxLength`, `min`, `max`, `wholeNumber`, `pattern` (`email`, `url`,
+  `phone`, `date`), `maxFileMb` and `fileTypes` (file extensions).
+- A valid answer is saved to `saveTo` (a number for `number`; the text; the phone number; the
+  location as `"latitude, longitude"`; for files, keep the `file_id`) and the question goes to
+  `next`.
+- A wrong answer sends `wrongAnswer.message` and asks again; after `maxTries` wrong answers it
+  goes to `afterMaxTries` instead (without `maxTries`, it asks until the answer is valid).
+- `cancel.words` (per language; several words separated by commas, `،` or new lines) cancel
+  the question when the user sends one of them, in any language, trimmed and ignoring case:
+  the question then goes to `cancel.goTo`.
+- A command sent meanwhile starts its start point and drops the question.
+
+**If.** Check the cases in order; the first whose `when` holds decides (`goTo`), else
+`otherwise`. `all` holds when every item holds (an empty `all` always holds), `any` when one
+does (an empty `any` never holds). `say` is the case in one sentence. Items:
+
+- `{ var, op, value }`: `isSet` (has a value that is not empty), `isEmpty`, `equals` and
+  `notEquals` (numbers compare as numbers when one side is a number, texts exactly),
+  `contains` and `startsWith` (texts, case-sensitive), `gt`, `gte`, `lt`, `lte` (as numbers;
+  false when either side is not a number). A `value` of `{ var }` is another variable.
+- `{ switch, is }`: a test switch, a fact only the bot knows (an admin list, a paid flag, a
+  plan); `testSwitches` says how the developer knows it. `is` is `true`, `false` or one of a
+  choice switch's `options`.
+- `{ language }`: the user's `language_code` is one of the list, or starts with one of them and
+  `-` (`pt` takes `pt-br`).
+- `{ memberOf }`: the user is a member of that channel or chat (`@name` or a chat ID):
+  `getChatMember` with `status` `creator`, `administrator` or `member` (or `restricted` with
+  `is_member`). The bot must be in that chat, as an administrator in a channel.
+
+**Remember.** Apply the actions in order: `set` the value, `clear` the variable, `add` or
+`subtract` as numbers (a value that is not a number counts as 0), `append` as text (no space
+added). Then go to `next`.
+
+**Wait.** Wait `amount` `unit`, then go to `next`. If the user does anything meanwhile,
+`ifUserActs: "cancel"` drops the wait (the default) and `"keep"` still goes on when the time is
+up. A reminder has `stopWhen` (with `"cancel"`): it is dropped only once that condition holds,
+checked each time the user does something and again when the time is up; otherwise it goes on.
+Keep waits in storage that survives a restart (Telegram has no delayed sending; check W21).
+
+**Actions** (`action`) make one Bot API call (`telegram.method`, with `telegram.params`) and go
+to `next`. One that names a step acts on the message that step sent this user last; nothing to
+act on (the step has not run for this user, or the message is gone) is not an error: go on. A
+refund needs the user's `telegram_payment_charge_id` of that invoice.
+
+**Event start points** (`subscriptionChanged`, `userBlocks`, `userRestarts`) start when their
+update arrives, and a broadcast when you send it (section 3); like a command, each drops a
+question that was waiting.
+
+**Developer steps** (`devStep`) are jobs only the developer can do: look up an order, check a
+code, call another service. `description` says what to do, `uses` the variables it reads and
+`sets` the ones it gives back. Its `outcomes` are the only ways on: finish by going to exactly
+one outcome's `goTo`.
+
+**Go to** jumps to `target`. **End** ends the conversation: the current step becomes none, and
+the next message that is not a command goes to the `fallback` start point.
+
+**`back`** goes to the message step the user came from. Keep a history of the message steps
+and questions shown, newest last (do not add a step that is already the newest). On `back`,
+drop the newest entry, then drop entries until the newest is a message step (questions are
+passed over), and show that step as the arrow says (by editing, for an inline button with
+"Edit this message"). With nothing left, `back` goes nowhere: the press is answered and the
+message stays.
+
+**Loops.** Logic boxes (If, Remember, Go to) can lead in a circle without a message. Stop after
+a fixed number of steps without the user doing anything (Try it in xDesign stops after 100).
+
+## 6. Edits: what Telegram can and cannot do
+
+"Edit this message" turns the pressed message into the target step's message. `onClick`
+already names the right call; for `editMessage*` (a target known only when the bot runs) pick
+it by these rules, and send a new message where no edit can do it:
+
+- A message sent with a bottom keyboard (`ReplyKeyboardMarkup`), a keyboard removal
+  (`ReplyKeyboardRemove`) or a forced reply (`ForceReply`) **cannot be edited**.
+- An edit sets **only an inline keyboard**: a target with a bottom keyboard, a keyboard removal
+  or a forced reply must be sent as a new message.
+- Text into text: `editMessageText`. **Text into media is possible**: `editMessageMedia`.
+- Media into text is not possible: send a new message.
+- Media into media: `editMessageMedia`; with the same file, `editMessageCaption` for the
+  caption, or `editMessageReplyMarkup` when only the buttons change. A voice message keeps its
+  file: only its caption can change.
+- Round videos, stickers, locations, venues, contacts, polls, quizzes and dice can change only
+  their buttons (`editMessageReplyMarkup`), and only when the content stays the same. Paid media
+  can change only its caption and buttons (with the same items and price). An invoice can
+  change only its buttons, and no message can be edited into an invoice: send it new.
+- A rich message into a rich message: `editMessageText` with `rich_message`; a text and a rich
+  message into each other are not stated by Telegram (send a new message to be safe).
+- An album is never edited as a whole (it has no keyboard either).
+- The bot's own messages in a private chat can be edited at any time.
+
+Every `editMessage*` method takes `chat_id` and `message_id`, or `inline_message_id`.
+
+## 7. Callbacks without a message (Bot API 10.5)
+
+With `callback_query_mode` (set through `setMySettings`, Bot API 10.5), a `callback_query` may
+carry `inline_message_id` instead of `message`. Do not assume `callback_query.message`: edit by
+`inline_message_id` when it is given, and know the user's step from the per-user state (section
+5) rather than from the message. A `message` that is too old to read comes as an
+`InaccessibleMessage` (its `date` is 0): edit it by its `message_id`, or send the step anew.
+
+## 8. Custom emoji and button looks
+
+- **Custom emoji** in texts and as button icons (`icon_custom_emoji_id`) work only for bots
+  with an extra username bought on Fragment, or in messages the bot sends to private chats when
+  the bot's owner has Telegram Premium. Ask the owner which case applies; where a custom emoji
+  cannot show, the fallback emoji inside it does. The checks list every step and button that
+  uses one (W11).
+- **Button looks** (`style`) are Bot API 9.4. Telegram apps released before Bot API 9.4
+  (2026-02-09) show every look as the default one: never let a color be the only meaning of a
+  button (the checks note it, I02).
+
+## 9. Languages
+
+- Pick the language by the user's `language_code`: the exported language that equals it, else
+  the one it starts with (`pt-br` takes `pt`), else the default language (`languages.default`).
+- Every text, label, popup and cancel word has one entry per language; a missing one falls back
+  to the default language.
+- Right-to-left languages (`languages.rightToLeft`) need nothing special: Telegram lays out
+  each paragraph by its own direction.
+- The commands menu, name, about and description are set per `language_code` (section 3).
+
+## 10. Checks
+
+`checks` (and section 9 of `design.md`) are the issues xDesign found at export time, each with
+`level`, `code`, `where` (a step's ID name), `button`, `language` and `message`; `ignored: true`
+marks a warning or good-to-know the designer chose to ignore there (build as designed).
+
+- `error`: Telegram cannot do what the design says. **Resolve every error with the designer
+  before building that part**; do not guess.
+- `warning`: an open point (a missing arrow, a missing translation, an unused variable). Build
+  as designed and list the warnings you met when you hand the bot over.
+- `info` (good to know): a fact for the builder, such as an icon that needs Premium.
+
+## 11. Build order and checklist
+
+A suggested order:
+
+1. Set up the bot: name, about, description, profile photo, commands menu and menu button.
+2. Per-user state and storage (section 5); the language choice (section 9).
+3. Start points, then message steps with their texts (section 4) and keyboards.
+4. Presses: `answerCallbackQuery`, `onClick`, edits (section 6), `back`, bottom keyboard presses.
+5. Questions with their checks, wrong answers and cancel words.
+6. If, Remember, Wait, Go to and End; then the developer steps.
+7. Walk the map of `design.md` and compare each message with its picture.
+
+Before handing the bot over, check:
+
+- [ ] Every step in `steps` is reachable as drawn: each arrow, button and outcome goes where
+      `spec.json` says, and nowhere else.
+- [ ] Every button's `suggestedCallbackData` (or the callback data you chose) is at most 64
+      bytes.
+- [ ] Every press is answered with `answerCallbackQuery`, with the popup's text when it has one.
+- [ ] Edits follow `onClick` and section 6; nothing assumes `callback_query.message`.
+- [ ] Variable values are escaped in HTML texts, or entity offsets shifted in UTF-16 units.
+- [ ] Every exported language works, and a missing translation falls back to the default.
+- [ ] `back` returns to the right message, past questions.
+- [ ] Questions accept exactly what `expects` and `checks` say; cancel words work in every
+      language.
+- [ ] Every developer step ends in one of its outcomes.
+- [ ] Waits survive a restart of the bot.
+- [ ] Broadcasts keep to Telegram's rates and skip users who blocked the bot.
+- [ ] Placeholder media were replaced with real files.
+- [ ] Every error in `checks` was resolved with the designer; the warnings left are listed.

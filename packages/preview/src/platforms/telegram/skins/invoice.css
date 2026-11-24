@@ -1,0 +1,207 @@
+/* Invoices and their payment sheet (PAY-02): drawn from InvoiceTokens (tokens.ts,
+   kindProperties), read from the Telegram apps and not measured yet (calibrate: O-02). The card
+   is the title and the description, then the photo with the price in the pill over media, or the
+   price on its own line; the sheet takes the alert's colors. */
+
+.tg-invoice {
+  display: flow-root;
+  padding: var(--tg-pad-top) var(--tg-pad-right) var(--tg-pad-bottom) var(--tg-pad-left);
+  overflow-wrap: anywhere;
+}
+
+.tg-invoice-title {
+  font-size: var(--tg-invoice-title-size);
+  font-weight: var(--tg-invoice-title-weight);
+  text-align: start;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-invoice-text {
+  margin-top: 2px;
+  text-align: start;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-invoice-price {
+  margin-top: 6px;
+  font-size: var(--tg-invoice-price-size);
+  font-weight: 600;
+}
+
+.tg-invoice-label {
+  margin-inline-start: 0.4em;
+  color: var(--tg-meta);
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* The photo under the texts: square top corners, the bubble's at the bottom. */
+.tg-body + .tg-media.alone {
+  margin-top: 0;
+  border-top-left-radius: var(--tg-media-caption-radius);
+  border-top-right-radius: var(--tg-media-caption-radius);
+}
+
+.tg-invoice-pill {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--tg-media-meta-bg);
+  color: var(--tg-media-meta-text);
+  font-size: var(--tg-invoice-price-size);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tg-invoice-pill .tg-invoice-label {
+  color: inherit;
+}
+
+.tg-invoice-pill img.tg-emoji,
+.tg-invoice-price img.tg-emoji {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+/* The payment sheet: from the bottom of the chat over its shade. */
+.tg-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: rgb(0 0 0 / 40%);
+}
+
+.tg-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 85%;
+  padding: 16px;
+  overflow-y: auto;
+  border-radius: var(--tg-sheet-radius) var(--tg-sheet-radius) 0 0;
+  background: var(--tg-alert-bg);
+  color: var(--tg-alert-text);
+  font-size: var(--tg-alert-size);
+}
+
+.tg-sheet-heading {
+  font-size: var(--tg-alert-title-size);
+  font-weight: 600;
+  text-align: center;
+}
+
+.tg-sheet-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tg-sheet-photo {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.tg-sheet-about {
+  min-width: 0;
+}
+
+.tg-sheet-title {
+  font-weight: 600;
+}
+
+.tg-sheet-text,
+.tg-sheet-label,
+.tg-sheet-ask {
+  color: var(--tg-meta);
+}
+
+.tg-sheet-text {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.tg-sheet-lines,
+.tg-sheet-asks,
+.tg-sheet-shipping {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tg-sheet-line,
+.tg-sheet-option {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.tg-sheet-line.total {
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, currentcolor 15%, transparent);
+  font-weight: 600;
+}
+
+.tg-sheet-option {
+  align-items: center;
+  cursor: pointer;
+}
+
+.tg-sheet-option-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.tg-sheet-radio {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border: 2px solid var(--tg-meta);
+  border-radius: 50%;
+}
+
+.tg-sheet-option[aria-checked='true'] .tg-sheet-radio {
+  border: 5px solid var(--tg-alert-button);
+}
+
+.tg-sheet-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tg-sheet-pay,
+.tg-sheet-cancel {
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tg-sheet-pay {
+  background: var(--tg-alert-button);
+  color: #fff;
+}
+
+.tg-sheet-cancel {
+  background: transparent;
+  color: var(--tg-alert-button);
+}

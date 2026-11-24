@@ -1,0 +1,7 @@
+/*
+ * The SPA's stylesheet (main.tsx imports it; Prettier's Tailwind plugin reads it for the class
+ * order): Tailwind with the design tokens (app.css) and the design system's motion
+ * (components.css), both from xWriter's panel.
+ */
+@import './app.css';
+@import './components.css';

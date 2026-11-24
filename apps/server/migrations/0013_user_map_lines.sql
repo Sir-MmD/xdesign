@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `map_lines` text DEFAULT 'short' NOT NULL;

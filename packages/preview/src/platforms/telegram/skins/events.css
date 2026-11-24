@@ -1,0 +1,136 @@
+/* The events of stage 2 in the private chat (EVT-02): drawn from EventTokens (tokens.ts,
+   kindProperties), read from the Telegram apps and not measured yet (calibrate: O-02). The
+   pinned message bar sits under the top bar (a floating one's gap below it) in the bar's colors,
+   its accent line, title and text in one line each; a gift is a card in the middle of the chat
+   in the service lines' fill; the bot's reaction on the user's message takes the outgoing
+   colors. */
+
+.tg-pinned {
+  position: absolute;
+  top: calc(var(--tg-header-top) + var(--tg-header-height) + var(--tg-pinned-gap));
+  right: var(--tg-header-side);
+  left: var(--tg-header-side);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--tg-pinned-height);
+  padding: 0 var(--tg-pinned-pad);
+  border-radius: var(--tg-pinned-radius);
+  background: var(--tg-header);
+  box-shadow: var(--tg-header-shadow);
+  color: var(--tg-header-text);
+}
+
+.tg-pinned::before {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: var(--tg-pinned-line);
+  margin: 7px 0;
+  border-radius: calc(var(--tg-pinned-line) / 2);
+  background: var(--tg-accent);
+  content: '';
+}
+
+.tg-pinned-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.tg-pinned-title {
+  color: var(--tg-accent);
+  font-size: var(--tg-pinned-title-size);
+  font-weight: 600;
+}
+
+.tg-pinned-text {
+  overflow: hidden;
+  font-size: var(--tg-pinned-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-pinned-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--tg-header-icon);
+  fill: currentColor;
+}
+
+/* A gift: the card in the middle of the chat with the gift in its picture's place, the title,
+   the text and the button. */
+.tg-gift-row {
+  display: flex;
+  justify-content: center;
+  margin: var(--tg-service-margin) 0;
+  padding: 0 8px;
+}
+
+.tg-gift {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: var(--tg-gift-width);
+  max-width: 100%;
+  padding: var(--tg-gift-pad);
+  border-radius: var(--tg-gift-radius);
+  background: var(--tg-wp-fill, var(--tg-service-bg));
+  color: var(--tg-service-text);
+  font-size: var(--tg-gift-size);
+  text-align: center;
+}
+
+.tg-gift-picture {
+  display: grid;
+  place-items: center;
+  width: var(--tg-gift-picture);
+  height: var(--tg-gift-picture);
+  font-size: calc(var(--tg-gift-picture) * 0.6);
+  line-height: 1;
+}
+
+.tg-gift-about {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.85em;
+  opacity: 0.8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-gift-title {
+  font-size: var(--tg-gift-title-size);
+  font-weight: 600;
+}
+
+.tg-gift-text {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap;
+}
+
+.tg-gift-button {
+  margin-top: 4px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  font-weight: 600;
+}
+
+/* The bot's reaction on the user's message, in the outgoing colors. */
+.tg-row.out .tg-reactions {
+  padding: 0;
+}
+
+.tg-row.out .tg-reaction {
+  background: color-mix(in srgb, var(--tg-out-meta) 18%, transparent);
+  color: var(--tg-out-meta);
+}

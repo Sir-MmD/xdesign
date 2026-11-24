@@ -1,0 +1,495 @@
+/* Telegram for iOS's own rules (docs/plan/29-owner-list-2026-10-22.md section 8.6, TGP-07),
+   from its measurement sheet .dev/upd29/tg/ios.md: what this look draws differently from the
+   shared rules of preview.css, which imports this file into the preview's shadow root. Every
+   rule is scoped by the look and repeats the shared selector after it, so it wins over the
+   shared rule:
+
+     [data-skin='ios'] .tg-share { ... }
+     [data-skin='ios'][data-theme='dark'] .tg-bubble { ... }
+     .tg-chat[data-skin='ios'] { ... }    (the chat itself; the rich card is .tg-card)
+
+   Telegram's art for this look is var(--tg-art-<role>) (art/icons.ts); on the parts that
+   wallpaper/ios.ts names in fillParts, var(--tg-wp-fill) is the wallpaper's "free" fill and
+   var(--tg-wp-fill-color) its colour at the part's middle. Values that are tokens belong in
+   ios.ts; this file holds the shapes and parts the tokens cannot draw. */
+
+/* The bubble (sheet 4.1): a hairline outline in light and no shadow. Beside the tail, the ring
+   round the bubble leaves out the corner left of where the tail's inner edge meets the bubble's
+   curve (6.73 px in), and the tail draws its own outline under its fill. */
+[data-skin='ios'] .tg-bubble-wrap:has(> .tg-tail) > .tg-bubble {
+  box-shadow: none;
+}
+
+[data-skin='ios'] .tg-bubble-wrap:has(> .tg-tail)::before {
+  position: absolute;
+  inset: calc(-1 * var(--tg-outline-width));
+  border-radius: calc(var(--tg-radius) + var(--tg-outline-width));
+  background: var(--tg-outline);
+  content: '';
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000000 0 0) left top / 100% calc(100% - var(--tg-radius) - var(--tg-outline-width)) no-repeat,
+    linear-gradient(#000000 0 0) right bottom / calc(100% - 6.73px - var(--tg-outline-width))
+      calc(var(--tg-radius) + var(--tg-outline-width)) no-repeat;
+  mask:
+    linear-gradient(#000000 0 0) left top / 100% calc(100% - var(--tg-radius) - var(--tg-outline-width)) no-repeat,
+    linear-gradient(#000000 0 0) right bottom / calc(100% - 6.73px - var(--tg-outline-width))
+      calc(var(--tg-radius) + var(--tg-outline-width)) no-repeat;
+}
+
+[data-skin='ios'] .tg-tail {
+  overflow: visible;
+  filter: none;
+}
+
+[data-skin='ios'] .tg-tail path {
+  stroke: var(--tg-outline);
+  stroke-width: calc(2 * var(--tg-outline-width));
+  paint-order: stroke;
+}
+
+/* Night: the bubble and its tail take the wallpaper's fill (sheet 3.3). */
+[data-skin='ios'][data-theme='dark'] .tg-bubble {
+  background: var(--tg-wp-fill, var(--tg-bubble));
+}
+
+[data-skin='ios'][data-theme='dark'] .tg-tail {
+  fill: var(--tg-wp-fill-color, var(--tg-bubble));
+}
+
+/* The info row (sheet 4.2): the eye is 12.67 x 8.67; under big emoji the pill is the wallpaper's
+   fill. */
+[data-skin='ios'] .tg-eye {
+  height: 8.67px;
+}
+
+[data-skin='ios'] .tg-meta.overlay.big {
+  background: var(--tg-wp-fill, var(--tg-big-emoji-meta-bg));
+}
+
+[data-skin='ios'] .tg-duration {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The share button (sheet 4.4): the wallpaper's fill. */
+[data-skin='ios'] .tg-share {
+  background: var(--tg-wp-fill, var(--tg-share));
+}
+
+/* Reactions under media without a caption stand 4 under the bubble on the wallpaper's fill, and
+   the bubble's bottom merges with them: no tail, its corner the small one
+   (ChatMessageBubbleItemNode.swift:2399-2410, ChatMessageReactionsFooterContentNode.swift:112-135,
+   ChatMessageBackground.swift:198-203; TGP-02). */
+[data-skin='ios'] .tg-reactions.outside .tg-reaction {
+  background: var(--tg-wp-fill, var(--tg-reaction-outside-bg));
+}
+
+/* Over the fill a reaction is clear, in Night 7 % white (selectReactionFillStaticColor,
+   DefaultDayPresentationTheme.swift:18-32, DefaultDarkPresentationTheme.swift:614-620; RVW-29c). */
+[data-skin='ios'][data-theme='dark'] .tg-reactions.outside .tg-reaction {
+  box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.07);
+}
+
+[data-skin='ios'] .tg-message:has(> .tg-reactions.outside) .tg-bubble {
+  border-bottom-left-radius: var(--tg-radius-small);
+}
+
+[data-skin='ios'] .tg-message:has(> .tg-reactions.outside) .tg-bubble > :is(.tg-media, .tg-album).alone {
+  border-bottom-left-radius: calc(var(--tg-radius-small) - var(--tg-media-inset));
+}
+
+/* Quotes (sheet 4.5): as wide as their text, 4.72 px under the line box before them and 4.78 px
+   over the one after them, 2 px over the first line and 3.5 px under the last; the first line
+   keeps 7 px more at its end for the mark. The text keeps a line's spacing under its last line
+   and the quote under its own (InteractiveTextComponent.swift:1910-1912, 2015-2033: 2.43 + 6 - 3
+   above, 2 + 2 under; RVW-29c). */
+[data-skin='ios'] .tg-quote {
+  width: fit-content;
+  max-width: 100%;
+  margin: 4.72px 0 4.78px;
+  padding-bottom: 3.5px;
+}
+
+[data-skin='ios'] .tg-quote-body::before {
+  float: right;
+  width: 7px;
+  height: 1lh;
+  content: '';
+}
+
+/* A folded quote is 3 + ceil(3 x 18.71) + 2 = 62 tall, so the top of its fourth line shows at its
+   bottom under the fade: clear over the last 1.2 px, whole from 6 px up, and round a point 18 px
+   left of its right edge and 2 px under it (the mask of InteractiveTextComponent.swift:27-56 at
+   3229-3235, 2 px under the box with the text's inset; RVW-29c). */
+[data-skin='ios'] .tg-quote.folded {
+  padding-bottom: 0;
+}
+
+[data-skin='ios'] .tg-quote.folded .tg-quote-body {
+  max-height: 60px;
+  -webkit-mask-image:
+    linear-gradient(to top, transparent 1.2px, #000000 6px),
+    radial-gradient(circle 34px at calc(100% - 9px) calc(100% + 2px), transparent 17px, #000000 34px);
+  mask-image:
+    linear-gradient(to top, transparent 1.2px, #000000 6px),
+    radial-gradient(circle 34px at calc(100% - 9px) calc(100% + 2px), transparent 17px, #000000 34px);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* Code blocks (sheet 4.6): a quote's box with the language over the code (capitalized as Swift
+   does by ios.ts, code.language) and the code mark at the top right. */
+[data-skin='ios'] .tg-pre {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 4.72px 0 4.78px;
+}
+
+[data-skin='ios'] .tg-pre::after {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 14px;
+  height: 10px;
+  background: var(--tg-pre-bar);
+  content: '';
+  -webkit-mask: var(--tg-art-code-mark) center / contain no-repeat;
+  mask: var(--tg-art-code-mark) center / contain no-repeat;
+  mask-mode: var(--tg-art-mask-mode, alpha);
+}
+
+[data-skin='ios'] .tg-pre-header {
+  line-height: 16.71px;
+}
+
+/* The link preview (ChatMessageAttachedContentNode.swift; RVW-29c): the small picture 54 px with
+   4 px corners, 6 px from the box's top and right; the text's lines that start less than 58 px
+   under its top are 60 px shorter for it, and the box is at least 6 + 54 + 6 tall (405-412,
+   555-565 with TextNode's cutout, 966-985, 1160-1170). A large picture ends 6 px over the box's
+   bottom (298, 966-975). */
+[data-skin='ios'] .tg-webpage {
+  position: relative;
+}
+
+[data-skin='ios'] .tg-webpage:has(> .tg-webpage-photo) {
+  padding-bottom: 6px;
+}
+
+[data-skin='ios'] .tg-webpage.with-thumb .tg-webpage-text {
+  min-height: 0;
+  margin-right: 0;
+}
+
+[data-skin='ios'] .tg-webpage.with-thumb .tg-webpage-text::before {
+  float: right;
+  width: 60px;
+  height: 60px;
+  content: '';
+}
+
+[data-skin='ios'] .tg-webpage-thumb {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  float: none;
+  margin: 0;
+}
+
+/* The info row has its own line under a link preview, its 14 px 3.33 px under the box, and the
+   bubble ends 22 px under the box (9 + 14 under it, less the node's 1; 990-1001, 1531); before
+   the comments bar the hairline is there. Reactions start 6.33 px under the box, 3 into the info
+   row's node (ChatMessageDateAndStatusNode.swift:990-1000). */
+[data-skin='ios'] .tg-text > .tg-webpage + .tg-meta-spacer {
+  height: 15.62px;
+}
+
+[data-skin='ios'] .tg-text.before-footer > .tg-webpage + .tg-meta-spacer {
+  height: 18.62px;
+}
+
+[data-skin='ios'] .tg-text.before-footer > .tg-webpage:last-child {
+  margin-bottom: 1.61px;
+}
+
+/* A quote or code block that ends the text: the text ends 4 + 0.5 under its box, then the info
+   row's own line (2015-2033 above; the spacer after a block has its own line). */
+[data-skin='ios'] .tg-text > :is(.tg-quote, .tg-pre):has(+ .tg-meta-spacer),
+[data-skin='ios'] .tg-text > :is(.tg-quote, .tg-pre):last-child {
+  margin-bottom: 2.79px;
+}
+
+/* Reactions in the bubble start 3 under the text's end, 4.72 under its last line box, in the info
+   row's node (ChatMessageDateAndStatusNode.swift:990-1000), and end 5.67 over the bubble's bottom
+   (the node's 1 under them and the text's 5.67 inset, less the node's 1: 1041-1046,
+   ChatMessageTextBubbleContentNode.swift:250-255), 2.67 over the comments bar's hairline (the
+   inset less 3, the hairline 1 over the node's end); after a link preview its node keeps the 5.67
+   before the hairline too (ChatMessageAttachedContentNode.swift:988-1001, 1531). The time sits on
+   their last row's bottom (5.32 and 2.32 as the info row draws it); when it takes a line of its
+   own under them it keeps that place over the bottom, so it stands 3 higher than in the app. With
+   the comments bar and no reactions the time's node ends 1.67 over the hairline, 1.32 as the info
+   row draws it; under a link preview it keeps its 4 (RVW-29c). */
+[data-skin='ios'] .tg-body:has(> .tg-reactions) > .tg-text {
+  padding-bottom: 1.72px;
+}
+
+[data-skin='ios'] .tg-body > .tg-reactions {
+  padding-bottom: 5.67px;
+}
+
+[data-skin='ios'] .tg-body > .tg-reactions + .tg-meta {
+  bottom: 5.32px;
+}
+
+[data-skin='ios'] .tg-body:has(+ .tg-comments) > .tg-text:not(:has(> .tg-webpage)) + .tg-reactions {
+  padding-bottom: 2.67px;
+}
+
+[data-skin='ios'] .tg-body:has(+ .tg-comments) > .tg-text:not(:has(> .tg-webpage)) + .tg-reactions + .tg-meta {
+  bottom: 2.32px;
+}
+
+[data-skin='ios']
+  .tg-body:has(+ .tg-comments):not(:has(> .tg-reactions)):not(:has(> .tg-text > .tg-webpage))
+  > .tg-meta {
+  bottom: 1.32px;
+}
+
+/* A rich post keeps its bottom room: iOS's rich layout was not traced (RVW-29c). */
+[data-skin='ios'] .tg-rich {
+  padding-bottom: 3.95px;
+}
+
+/* A preview above the text starts 10 px under the bubble's top, and the text's line box 3.12 px
+   under the box (11 over a first node, the text's top inset less 2; 830-836). */
+[data-skin='ios'] .tg-webpage-wrap.above {
+  padding-top: 10px;
+}
+
+[data-skin='ios'] .tg-webpage-wrap.above > .tg-webpage {
+  margin-top: 0;
+}
+
+[data-skin='ios'] .tg-webpage-wrap.above + .tg-body > .tg-text {
+  padding-top: 3.12px;
+}
+
+/* The comments bar (sheet 3.5, CMT:205-305): from the hairline's top, the icon 8 px down, the
+   text's baseline 25.67 px (its label 9.67 px down on TextNode's line, 16 to the baseline) and the
+   arrow 9 px, each margin under the 0.33 px hairline; the text may run to 4 px before the arrow
+   (RVW-29c). */
+[data-skin='ios'] .tg-comments {
+  align-items: flex-start;
+  border-top-width: 0.33px;
+}
+
+[data-skin='ios'] .tg-comments-icon {
+  margin-top: 7.67px;
+}
+
+[data-skin='ios'] .tg-comments-text {
+  margin-top: 9.09px;
+  line-height: 1.2;
+}
+
+[data-skin='ios'] .tg-comments-arrow {
+  margin-top: 8.67px;
+  margin-left: -7px;
+}
+
+/* Inline buttons (sheet 4.9): the wallpaper's fill, Night's 8 % lighter; a style's color at 70 %
+   over it; a button that only answers keeps 4 px at its sides, one with a mark 14. */
+[data-skin='ios'] .tg-kb-button,
+[data-skin='ios'] .tg-kb-button.success,
+[data-skin='ios'] .tg-kb-button.primary,
+[data-skin='ios'] .tg-kb-button.danger {
+  background: var(--tg-wp-fill, var(--tg-kb-bg));
+}
+
+[data-skin='ios'] .tg-kb-button[data-kind='callback'] {
+  padding: 0 4px;
+}
+
+[data-skin='ios'][data-theme='dark'] .tg-kb-button {
+  box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='ios'] .tg-kb-button.success {
+  box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent);
+}
+
+[data-skin='ios'] .tg-kb-button.primary {
+  box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent);
+}
+
+[data-skin='ios'] .tg-kb-button.danger {
+  box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent);
+}
+
+/* Night keeps its 8 % white under a style's color (the color's view is over the button's
+   fill and its lighter layer; RVW-29c). */
+[data-skin='ios'][data-theme='dark'] .tg-kb-button.success {
+  box-shadow:
+    inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent),
+    inset 0 0 0 100vmax rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='ios'][data-theme='dark'] .tg-kb-button.primary {
+  box-shadow:
+    inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent),
+    inset 0 0 0 100vmax rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='ios'][data-theme='dark'] .tg-kb-button.danger {
+  box-shadow:
+    inset 0 0 0 100vmax color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent),
+    inset 0 0 0 100vmax rgba(255, 255, 255, 0.08);
+}
+
+/* The top bar of iOS 26 (sheet 4.8): no bar, but glass pieces floating over the chat: the back
+   button at the left, the title's capsule in the middle (44 tall, 12 px at its sides) and the
+   avatar in a ring of glass at the right. */
+[data-skin='ios'] .tg-header {
+  justify-content: space-between;
+  background: none;
+  box-shadow: none;
+}
+
+[data-skin='ios'] .tg-header-text {
+  justify-content: center;
+  min-width: 0;
+  height: var(--tg-header-height);
+  padding: 0 12px;
+  border-radius: calc(var(--tg-header-height) / 2);
+  background: var(--tg-header);
+}
+
+/* The glass's edge is a 0.8 px line of white at 0.6 (Night 0.15) inside its rim, under its soft
+   shadows (GlassBackgroundComponent.swift:1056-1078, 1176-1180, 1243-1292; the white edges of
+   1186-1240 are commented out; RVW-29c). */
+[data-skin='ios'] .tg-header-text,
+[data-skin='ios'] .tg-header-button {
+  box-shadow:
+    0 1px 40px rgba(0, 0, 0, 0.04),
+    0 0 30px rgba(0, 0, 0, 0.045),
+    0 0 20px rgba(0, 0, 0, 0.01),
+    inset 0 0 0 0.8px rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: saturate(2.55) blur(2px);
+  backdrop-filter: saturate(2.55) blur(2px);
+}
+
+[data-skin='ios'][data-theme='dark'] .tg-header-text,
+[data-skin='ios'][data-theme='dark'] .tg-header-button {
+  box-shadow:
+    0 1px 40px rgba(0, 0, 0, 0.04),
+    0 0 30px rgba(0, 0, 0, 0.045),
+    0 0 20px rgba(0, 0, 0, 0.01),
+    inset 0 0 0 0.8px rgba(255, 255, 255, 0.15);
+}
+
+[data-skin='ios'] .tg-header-avatar {
+  margin: calc((var(--tg-header-button) - var(--tg-header-avatar)) / 2);
+  box-shadow:
+    0 0 0 calc((var(--tg-header-button) - var(--tg-header-avatar)) / 2) var(--tg-header),
+    0 0 30px rgba(0, 0, 0, 0.045);
+}
+
+/* The back chevron, drawn here: the look has no art for it. */
+[data-skin='ios'] .tg-header-button.back > * {
+  display: none;
+}
+
+[data-skin='ios'] .tg-header-button.back::before {
+  width: 100%;
+  height: 100%;
+  background: var(--tg-header-icon);
+  content: '';
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cpath d='M24.6 14 17 22l7.6 8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cpath d='M24.6 14 17 22l7.6 8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+
+/* The edge under the bar (CCN:2438-2443, 2652-2681): 80 px fading out along iOS's curve at
+   0.75. Night darkens the chat; Classic shows the plain gradient over the pattern, as the blur
+   of the wallpaper there does. */
+[data-skin='ios'] .tg-header-fade {
+  background: linear-gradient(
+    to bottom,
+    var(--tg-header-fade-color) 0%,
+    color-mix(in srgb, var(--tg-header-fade-color) 97.2%, transparent) 13.2%,
+    color-mix(in srgb, var(--tg-header-fade-color) 91.7%, transparent) 23.3%,
+    color-mix(in srgb, var(--tg-header-fade-color) 82.9%, transparent) 31.4%,
+    color-mix(in srgb, var(--tg-header-fade-color) 70.4%, transparent) 39.4%,
+    color-mix(in srgb, var(--tg-header-fade-color) 54.6%, transparent) 47%,
+    color-mix(in srgb, var(--tg-header-fade-color) 38.9%, transparent) 54.7%,
+    color-mix(in srgb, var(--tg-header-fade-color) 21.3%, transparent) 64.1%,
+    color-mix(in srgb, var(--tg-header-fade-color) 13.9%, transparent) 69.7%,
+    color-mix(in srgb, var(--tg-header-fade-color) 5.6%, transparent) 79.1%,
+    transparent 100%
+  );
+}
+
+.tg-wallpaper:has(.tg-chat[data-skin='ios'][data-theme='light']) > .tg-wallpaper-layers::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--tg-header-fade, 80px);
+  background: var(--tg-wp-gradient) var(--tg-wp-gradient-position) / var(--tg-wp-gradient-size) no-repeat;
+  content: '';
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.729) 13.2%,
+    rgba(0, 0, 0, 0.688) 23.3%,
+    rgba(0, 0, 0, 0.622) 31.4%,
+    rgba(0, 0, 0, 0.528) 39.4%,
+    rgba(0, 0, 0, 0.41) 47%,
+    rgba(0, 0, 0, 0.292) 54.7%,
+    rgba(0, 0, 0, 0.16) 64.1%,
+    rgba(0, 0, 0, 0.104) 69.7%,
+    rgba(0, 0, 0, 0.042) 79.1%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.729) 13.2%,
+    rgba(0, 0, 0, 0.688) 23.3%,
+    rgba(0, 0, 0, 0.622) 31.4%,
+    rgba(0, 0, 0, 0.528) 39.4%,
+    rgba(0, 0, 0, 0.41) 47%,
+    rgba(0, 0, 0, 0.292) 54.7%,
+    rgba(0, 0, 0, 0.16) 64.1%,
+    rgba(0, 0, 0, 0.104) 69.7%,
+    rgba(0, 0, 0, 0.042) 79.1%,
+    transparent 100%
+  );
+}
+
+/* The private chat (PRV-02; calibrate: O-02): service lines and the empty chat's card in the
+   wallpaper's fill; the alert is the system's, its texts centred and its button across it under
+   a hairline. */
+[data-skin='ios'] .tg-service-text {
+  background: var(--tg-wp-fill, var(--tg-service-bg));
+}
+
+[data-skin='ios'] .tg-empty-card {
+  background: var(--tg-wp-fill, var(--tg-empty-bg));
+}
+
+[data-skin='ios'] .tg-alert {
+  text-align: center;
+}
+
+[data-skin='ios'] .tg-alert-buttons {
+  margin: 16px -16px 0;
+  border-top: 0.5px solid rgba(128, 128, 128, 0.4);
+}
+
+[data-skin='ios'] .tg-alert-button {
+  flex: 1 1 auto;
+  padding: 11px;
+  border-radius: 0;
+}

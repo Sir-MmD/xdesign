@@ -1,0 +1,378 @@
+/* Telegram for Android's own rules (docs/plan/29-owner-list-2026-10-22.md section 8.4, TGP-06;
+   .dev/upd29/tg/android.md): what this look draws differently from the shared rules of
+   preview.css, which imports this file into the preview's shadow root. Every rule is scoped by
+   the look and repeats the shared selector after it, so it wins over the shared rule:
+
+     [data-skin='android'] .tg-share { ... }
+     [data-skin='android'][data-theme='dark'] .tg-bubble { ... }
+     .tg-chat[data-skin='android'] { ... }    (the chat itself; the rich card is .tg-card)
+
+   Telegram's art for this look is var(--tg-art-<role>) (art/icons.ts); on the parts that
+   wallpaper/android.ts names in fillParts, var(--tg-wp-fill) is the wallpaper's fill.
+   Values that are tokens belong in android.ts; this file holds the shapes and parts the
+   tokens cannot draw. */
+
+/* BackDrawable's arrow, drawn by code in the app (BackDrawable.java:122-145, android.md 4.2): a
+   stroke of 2 with round caps in a 24 box; SkinIcons.back points here. The glass pieces of the
+   top bar: a hairline of 0.55 inside them (white in Classic, white at 0.1 in Night between its
+   0.125 top and 0.078 bottom) and, in Classic, a shadow of radius 1, 0.33 down at 0.125
+   (BlurredBackgroundProviderImpl.java:169-187, BlurredBackgroundProviderBuilder.java:15; the CSS
+   form an estimate). */
+.tg-chat[data-skin='android'] {
+  --tg-android-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4.59 12H18.34M4.09 12.25L11.34 5.5M4.09 11.75L11.34 18.5' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --tg-android-glass: inset 0 0 0 0.55px #ffffff, 0 0.33px 1.5px rgba(0, 0, 0, 0.125);
+}
+
+.tg-chat[data-skin='android'][data-theme='dark'] {
+  --tg-android-glass: inset 0 0 0 0.55px rgba(255, 255, 255, 0.1);
+}
+
+/* The top bar (ActionBar.java:2230-2276, ChatAvatarContainer.java:757-786): the back circle 6
+   from the left, the menu circle 6 from the right, each 46, and between them, 6 away, the pill
+   with the avatar 4 in and 2 down, the name 6.66 after it and 17.34 after the name, centred
+   between the circles and as wide as all the room at most; the name's box 2.66 under the pill's
+   top, the subscribers' 1.49 under the name's. Their glass is the fixed colour of the default
+   wallpaper under them (headerButton). */
+[data-skin='android'] .tg-header-button {
+  box-shadow: var(--tg-android-glass);
+}
+
+[data-skin='android'] .tg-header-button.menu {
+  margin-inline-start: 0;
+}
+
+[data-skin='android'] .tg-header-main {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: flex-start;
+  gap: 6.66px;
+  min-width: 0;
+  height: var(--tg-header-button);
+  margin: 0 auto;
+  padding: 2px 17.34px 0 4px;
+  border-radius: calc(var(--tg-header-button) / 2);
+  background: var(--tg-header-button-bg);
+  box-shadow: var(--tg-android-glass);
+}
+
+[data-skin='android'] .tg-header-text {
+  padding-top: 0.66px;
+}
+
+[data-skin='android'] .tg-header-sub {
+  margin-top: 1.49px;
+}
+
+/* The info row's eye: 14.33 x 10, its top 1.5 under the time's box (ChatMessageCell.java:24641). */
+[data-skin='android'] .tg-eye {
+  position: relative;
+  top: -0.53px;
+  height: 10px;
+}
+
+/* The info row's own line after a code block or a quote at the end of the text is 18
+   (ChatMessageCell.java:12926-12944); text after the block cannot be told apart here, so it
+   takes 18 too when the info row does not fit on its last line. */
+[data-skin='android'] .tg-pre + .tg-meta-spacer,
+[data-skin='android'] .tg-quote + .tg-meta-spacer {
+  height: 18px;
+}
+
+/* A quote as wide as its text and 24 (the whole column in the app once that is over 70 % of
+   it), 6 under its last line (4 when folded), and a one-line quote 37.4 tall with its line in
+   the middle (QuoteSpan.java:122-135: 7 more above and below a single line). */
+[data-skin='android'] .tg-quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 37.4px;
+  padding-bottom: 6px;
+}
+
+[data-skin='android'] .tg-quote.folded {
+  padding-bottom: 4px;
+}
+
+/* A code block: the column and 4 wide, 5 above the text after it (MessageObject.java:8901-8904,
+   ChatMessageCell.java:17031); its language as the app names it (android.ts, code.language). The
+   "COPY CODE" bar under long code has a line above it, 2 device pixels of the code's color at
+   0x26, from 10 after the block's start to 6.66 before its end (MessageObject.java:1103-1104). */
+[data-skin='android'] .tg-pre {
+  margin-right: -4px;
+  margin-bottom: 5px;
+}
+
+[data-skin='android'] .tg-pre-copy-bar {
+  position: relative;
+  overflow: visible;
+}
+
+[data-skin='android'] .tg-pre-copy-bar::before {
+  position: absolute;
+  top: -0.71px;
+  right: 6.66px;
+  left: 10px;
+  height: 0.71px;
+  background: color-mix(in srgb, var(--tg-pre-bar) 14.9%, transparent);
+  content: '';
+}
+
+/* A caption is 9 from the body's sides (ChatMessageCell.java:17164). */
+[data-skin='android'] .tg-media + .tg-body .tg-text,
+[data-skin='android'] .tg-album + .tg-body .tg-text {
+  padding-right: 9px;
+  padding-left: 9px;
+}
+
+/* Media: a bubble with a photo is as wide as the photo and 4 (the width - 70 for a landscape
+   one), past the text's widest; above a caption the picture's bottom-left corner is 3, above
+   the comments bar both bottom corners 4 (ChatMessageCell.java:10996-11068). */
+[data-skin='android'] .tg-bubble-wrap:has(> .tg-bubble[data-media='true']) {
+  max-width: none;
+}
+
+[data-skin='android'] .tg-media {
+  border-bottom-left-radius: 3px;
+}
+
+[data-skin='android'] .tg-bubble:has(> .tg-comments) .tg-media.alone {
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* An album (albumLayout.android.ts lays it out in the bubble's box, 2 in from its edges): each
+   picture's outer corners 15 and inner ones 4; above a caption, the inline buttons or the
+   comments bar the bottom ones 4 (bottom-left 3 above a caption); the 2 under the album is
+   the caption's own space. data-sides holds AlbumRectPart's flags: top 1, right 2, bottom 4,
+   left 8. */
+[data-skin='android'] .tg-album,
+[data-skin='android'] .tg-album.alone {
+  margin: 0;
+  overflow: visible;
+}
+
+[data-skin='android'] .tg-album:not(.alone) {
+  margin-bottom: -2px;
+}
+
+[data-skin='android'] .tg-album-item {
+  border-radius: 4px;
+}
+
+[data-skin='android'] .tg-album-item:is([data-sides='9'], [data-sides='11'], [data-sides='13'], [data-sides='15']) {
+  border-top-left-radius: 15px;
+}
+
+[data-skin='android'] .tg-album-item:is([data-sides='3'], [data-sides='7'], [data-sides='11'], [data-sides='15']) {
+  border-top-right-radius: 15px;
+}
+
+[data-skin='android']
+  .tg-album.alone
+  .tg-album-item:is([data-sides='6'], [data-sides='7'], [data-sides='14'], [data-sides='15']) {
+  border-bottom-right-radius: 15px;
+}
+
+[data-skin='android']
+  .tg-album.alone
+  .tg-album-item:is([data-sides='12'], [data-sides='13'], [data-sides='14'], [data-sides='15']) {
+  border-bottom-left-radius: 15px;
+}
+
+[data-skin='android']
+  .tg-album:not(.alone)
+  .tg-album-item:is([data-sides='12'], [data-sides='13'], [data-sides='14'], [data-sides='15']) {
+  border-bottom-left-radius: 3px;
+}
+
+[data-skin='android'] .tg-bubble.with-keyboard .tg-album.alone .tg-album-item[data-sides],
+[data-skin='android'] .tg-bubble:has(> .tg-comments) .tg-album.alone .tg-album-item[data-sides] {
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* The share button (ChatMessageCell.java:21612-21660): its circle's bottom 6 above the body's,
+   or centred beside a bubble lower than 44. The circle and its icon are drawn at the bottom of
+   a box as tall as the bubble, so the fill from the wallpaper stays under the button; beside
+   a message of emoji only it sits at the top. A bubble with a code block keeps its width (the
+   width - 38) even when the button then reaches past the chat's edge, as in the app. */
+[data-skin='android'] .tg-row {
+  align-items: center;
+}
+
+[data-skin='android'] .tg-row:has(.tg-pre) > .tg-bubble-wrap {
+  flex-shrink: 0;
+}
+
+[data-skin='android'] .tg-share {
+  position: relative;
+  align-self: stretch;
+  height: auto;
+  min-height: var(--tg-share-size);
+  border-radius: 0;
+  background: var(--tg-wp-fill, var(--tg-share));
+  -webkit-mask: radial-gradient(closest-side, #000000 calc(100% - 0.5px), transparent) left 50% bottom min(6px, 50%) /
+    var(--tg-share-size) var(--tg-share-size) no-repeat;
+  mask: radial-gradient(closest-side, #000000 calc(100% - 0.5px), transparent) left 50% bottom min(6px, 50%) /
+    var(--tg-share-size) var(--tg-share-size) no-repeat;
+}
+
+[data-skin='android'] .tg-share-icon {
+  position: absolute;
+  bottom: min(10px, calc(50% - 12px));
+  left: 4px;
+}
+
+[data-skin='android'] .tg-row:has(.tg-big-emoji) {
+  align-items: flex-start;
+}
+
+[data-skin='android'] .tg-row:has(.tg-big-emoji) > .tg-share {
+  align-self: flex-start;
+  height: var(--tg-share-size);
+  -webkit-mask-position: left 50% top 0;
+  mask-position: left 50% top 0;
+}
+
+[data-skin='android'] .tg-row:has(.tg-big-emoji) > .tg-share .tg-share-icon {
+  top: 4px;
+  bottom: auto;
+}
+
+/* Inline buttons, the share button's neighbours: the service fill, the wallpaper's gradient
+   through a colour matrix under each button (Theme.java:8735-8785), its style's colour at 0.7
+   over it; the fixed colours of android.md 4.9 until the fill is measured. The copy button's
+   icon (menu_copy_s at 0.9, 21.6) leads its label with a space (ChatMessageCell.java:10894-10898);
+   a button's own emoji is 20, 6 before the label (BotButton.java:168-196). */
+[data-skin='android'] .tg-kb-button {
+  background: var(--tg-wp-fill, var(--tg-kb-bg));
+}
+
+[data-skin='android'] .tg-kb-button.success {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-success) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-wp-fill, var(--tg-kb-bg));
+}
+
+[data-skin='android'] .tg-kb-button.primary {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-primary) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-wp-fill, var(--tg-kb-bg));
+}
+
+[data-skin='android'] .tg-kb-button.danger {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent),
+      color-mix(in srgb, var(--tg-kb-danger) var(--tg-kb-style-alpha), transparent)
+    ),
+    var(--tg-wp-fill, var(--tg-kb-bg));
+}
+
+[data-skin='android'] .tg-kb-button[data-kind='copy'] .tg-kb-mark {
+  position: static;
+  order: -1;
+  width: 21.6px;
+  height: 21.6px;
+  margin-inline-end: 3.71px;
+}
+
+[data-skin='android'] .tg-kb-icon {
+  margin-inline-end: 6px;
+  font-size: 16px;
+}
+
+/* Reactions start 9 in from the body's left, wrap 13 short of its right and end 8 above its
+   bottom (ChatMessageCell.java:15299-15317, 7760-7775); under a message of emoji only they sit
+   on the service fill. */
+[data-skin='android'] .tg-reactions {
+  padding: 0 13px 8px 9px;
+}
+
+[data-skin='android'] .tg-reactions.outside .tg-reaction {
+  background: var(--tg-wp-fill, var(--tg-reaction-outside-bg));
+}
+
+/* The comments bar's line: a hairline 0.9 under the bar's top, from 12 in to the body's right
+   edge (ChatMessageCell.java:23348-23360). */
+[data-skin='android'] .tg-comments {
+  position: relative;
+  border-top: 0;
+}
+
+[data-skin='android'] .tg-comments::before {
+  position: absolute;
+  top: 0.9px;
+  right: 0;
+  left: 12px;
+  height: 1px;
+  background: var(--tg-comments-border);
+  content: '';
+}
+
+/* A message of emoji only: its time on the service fill at 0.6, 17 tall, radius 4, 4 at each
+   side (ChatMessageCell.java:24013-24048; its place an estimate). */
+[data-skin='android'] .tg-meta.overlay.big {
+  right: 0;
+  bottom: 0;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tg-wp-fill-color, var(--tg-kb-bg)) 60%, transparent);
+}
+
+/* A link preview (ChatMessageCell.java:7800-8180, 15447-15900; RVW-29c): the site's name and the
+   title in Roboto Medium, 2 between the parts; the box from 0.33 left of the text's column to 1
+   right of it (linkX is the text's x less 1.33 plus 1, its right 10 from the bubble's); without
+   a site's name the first part is drawn 3 under the box's top, so 9 stay under the last
+   (15829-15836: no 4 added before the title, each part drawn 3 up); the small picture 6 from
+   the box's right, the lines beside it 48 + 10 shorter. */
+[data-skin='android'] .tg-webpage {
+  margin-right: -1px;
+  margin-left: -0.33px;
+}
+
+[data-skin='android'] .tg-webpage:not(:has(.tg-webpage-site)) {
+  padding-top: 3px;
+  padding-bottom: 9px;
+}
+
+[data-skin='android'] .tg-webpage-site,
+[data-skin='android'] .tg-webpage-title {
+  font-weight: 500;
+}
+
+[data-skin='android'] :is(.tg-webpage-title, .tg-webpage-desc):not(:first-child) {
+  margin-top: 2px;
+}
+
+[data-skin='android'] .tg-webpage.with-thumb .tg-webpage-text {
+  margin-right: 58px;
+}
+
+[data-skin='android'] .tg-webpage-thumb {
+  margin-right: -5.33px;
+}
+
+/* The private chat (PRV-02; calibrate: O-02): the input field's island and the Start plate in
+   the top bar's glass; service lines and the empty chat's card in the wallpaper's fill. */
+[data-skin='android'] .tg-composer,
+[data-skin='android'] .tg-start-button {
+  box-shadow: var(--tg-android-glass);
+}
+
+[data-skin='android'] .tg-service-text {
+  background: var(--tg-wp-fill, var(--tg-service-bg));
+}
+
+[data-skin='android'] .tg-empty-card {
+  background: var(--tg-wp-fill, var(--tg-empty-bg));
+}
